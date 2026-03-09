@@ -23,6 +23,7 @@ $stats = [
     'testimoni'  => safeCount($pdo, "SELECT COUNT(*) FROM testimonials WHERE is_active=1"),
     'galeri'     => safeCount($pdo, "SELECT COUNT(*) FROM gallery WHERE is_active=1"),
     'faq'        => safeCount($pdo, "SELECT COUNT(*) FROM faqs WHERE is_active=1"),
+    'akun'       => safeCount($pdo, "SELECT COUNT(*) FROM admin_users WHERE is_active=1"),
 ];
 
 $featuredCount = safeCount($pdo, "SELECT COUNT(*) FROM products WHERE is_featured=1 AND is_active=1");
@@ -85,7 +86,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
   </a>
 </div>
 
-<div class="grid grid-cols-3 gap-3 mb-6">
+<div class="grid grid-cols-4 gap-3 mb-6">
   <a href="<?= $b ?>/admin/area" class="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
     <div class="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center text-lg">📍</div>
     <div><div class="font-bold text-gray-800"><?= $stats['area'] ?></div><div class="text-xs text-gray-500">Area</div></div>
@@ -97,6 +98,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
   <a href="<?= $b ?>/admin/faq" class="bg-violet-50 border border-violet-200 rounded-xl p-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
     <div class="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center text-lg">❓</div>
     <div><div class="font-bold text-gray-800"><?= $stats['faq'] ?></div><div class="text-xs text-gray-500">FAQ</div></div>
+  </a>
+  <a href="<?= $b ?>/admin/akun" class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
+    <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center text-lg">👤</div>
+    <div><div class="font-bold text-gray-800"><?= $stats['akun'] ?></div><div class="text-xs text-gray-500">Akun Admin</div></div>
   </a>
 </div>
 
@@ -180,6 +185,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <a href="<?= $b ?>/admin/galeri?action=tambah"   class="btn-secondary text-xs px-3 py-1.5">🖼️ Upload Galeri</a>
     <a href="<?= $b ?>/admin/faq?action=tambah"      class="btn-secondary text-xs px-3 py-1.5">❓ Tambah FAQ</a>
     <a href="<?= $b ?>/admin/pengaturan"             class="btn-secondary text-xs px-3 py-1.5">⚙️ Pengaturan</a>
+    <a href="<?= $b ?>/admin/akun"                   class="btn-secondary text-xs px-3 py-1.5">👤 Kelola Akun</a>
     <a href="<?= $b ?>" target="_blank"              class="btn-secondary text-xs px-3 py-1.5">🌐 Lihat Website ↗</a>
   </div>
 </div>

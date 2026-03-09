@@ -15,7 +15,7 @@ $meId   = (int)($_SESSION['admin_id'] ?? 0);
 if (isset($_GET['check_username'])) {
     $u   = clean($_GET['check_username']);
     $eid = (int)($_GET['exclude_id'] ?? 0);
-    $s   = $pdo->prepare("SELECT COUNT(*) FROM admins WHERE username=? AND id!=?");
+    $s   = $pdo->prepare("SELECT COUNT(*) FROM admin_users WHERE username=? AND id!=?");
     $s->execute([$u, $eid]);
     echo json_encode(['taken' => (bool)$s->fetchColumn()]);
     exit;
@@ -46,14 +46,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: ' . $b . '/admin/akun?action=tambah'); exit;
         }
         // Cek username unik
-        $check = $pdo->prepare("SELECT COUNT(*) FROM admins WHERE username=?");
+        $check = $pdo->prepare("SELECT COUNT(*) FROM admin_users WHERE username=?");
         $check->execute([$username]);
         if ($check->fetchColumn()) {
             $_SESSION['error'] = "Username \"$username\" sudah dipakai.";
             header('Location: ' . $b . '/admin/akun?action=tambah'); exit;
         }
 
-        $pdo->prepare("INSERT INTO admins (username, password, full_name, is_active) VALUES (?,?,?,?)")
+        $pdo->prepare("INSERT INTO admin_users (username, password, full_name, is_active) VALUES (?,?,?,?)")
             ->execute([$username, password_hash($password, PASSWORD_DEFAULT), $fullName, $isActive]);
         $_SESSION['success'] = "Akun \"$username\" berhasil dibuat.";
         header('Location: ' . $b . '/admin/akun'); exit;
@@ -81,10 +81,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['error'] = 'Konfirmasi password tidak cocok.';
                 header('Location: ' . $b . '/admin/akun?action=edit&id=' . $id); exit;
             }
-            $pdo->prepare("UPDATE admins SET full_name=?, is_active=?, password=?, updated_at=NOW() WHERE id=?")
+            $pdo->prepare("UPDATE admin_users SET full_name=?, is_active=?, password=?, updated_at=NOW() WHERE id=?")
                 ->execute([$fullName, $isActive, password_hash($password, PASSWORD_DEFAULT), $id]);
         } else {
-            $pdo->prepare("UPDATE admins SET full_name=?, is_active=?, updated_at=NOW() WHERE id=?")
+            $pdo->prepare("UPDATE admin_users SET full_name=?, is_active=?, updated_at=NOW() WHERE id=?")
                 ->execute([$fullName, $isActive, $id]);
         }
         $_SESSION['success'] = 'Akun berhasil diperbarui.';
@@ -97,9 +97,9 @@ if (isset($_GET['toggle']) && $id) {
     if ($id === $meId) {
         $_SESSION['error'] = 'Kamu tidak bisa menonaktifkan akunmu sendiri.';
     } else {
-        $cur = $pdo->prepare("SELECT is_active FROM admins WHERE id=?");
+        $cur = $pdo->prepare("SELECT is_active FROM admin_users WHERE id=?");
         $cur->execute([$id]);
-        $pdo->prepare("UPDATE admins SET is_active=? WHERE id=?")->execute([$cur->fetchColumn() ? 0 : 1, $id]);
+        $pdo->prepare("UPDATE admin_users SET is_active=? WHERE id=?")->execute([$cur->fetchColumn() ? 0 : 1, $id]);
         $_SESSION['success'] = 'Status akun diperbarui.';
     }
     header('Location: ' . $b . '/admin/akun'); exit;
@@ -110,11 +110,11 @@ if (isset($_GET['hapus']) && $id) {
     if ($id === $meId) {
         $_SESSION['error'] = 'Kamu tidak bisa menghapus akunmu sendiri.';
     } else {
-        $total = (int)$pdo->query("SELECT COUNT(*) FROM admins WHERE is_active=1")->fetchColumn();
+        $total = (int)$pdo->query("SELECT COUNT(*) FROM admin_users WHERE is_active=1")->fetchColumn();
         if ($total <= 1) {
             $_SESSION['error'] = 'Tidak bisa menghapus — harus ada minimal 1 akun aktif.';
         } else {
-            $pdo->prepare("DELETE FROM admins WHERE id=?")->execute([$id]);
+            $pdo->prepare("DELETE FROM admin_users WHERE id=?")->execute([$id]);
             $_SESSION['success'] = 'Akun berhasil dihapus.';
         }
     }
@@ -133,7 +133,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 if ($action === 'tambah' || ($action === 'edit' && $id)):
     $item = ['username'=>'','full_name'=>'','is_active'=>1];
     if ($action === 'edit') {
-        $s = $pdo->prepare("SELECT * FROM admins WHERE id=?");
+        $s = $pdo->prepare("SELECT * FROM admin_users WHERE id=?");
         $s->execute([$id]);
         $item = $s->fetch();
         if (!$item) { echo '<p class="text-red-500">Akun tidak ditemukan.</p>'; require_once __DIR__ . '/../includes/admin_footer.php'; exit; }
@@ -384,7 +384,7 @@ else:
       </div>
     <?php unset($_SESSION['error']); endif;
 
-    $list = $pdo->query("SELECT * FROM admins ORDER BY is_active DESC, id ASC")->fetchAll();
+    $list = $pdo->query("SELECT * FROM admin_users ORDER BY is_active DESC, id ASC")->fetchAll();
     $totalAktif = count(array_filter($list, fn($a) => $a['is_active']));
 ?>
 
