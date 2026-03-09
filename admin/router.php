@@ -14,7 +14,7 @@ $page = $page ?: 'index';
 $page = makeSlug($page);
 
 // Map ke file
-$allowed = ['dashboard','produk','kategori','kota','area','layanan','testimoni','galeri','faq','pengaturan'];
+$allowed = ['dashboard','produk','kategori','kota','area','layanan','testimoni','galeri','faq','pengaturan','akun'];
 
 if ($page === '' || $page === 'index') {
     require __DIR__ . '/index.php'; exit();

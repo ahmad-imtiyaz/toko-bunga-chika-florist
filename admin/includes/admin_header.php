@@ -16,6 +16,7 @@ $nav_items = [
     ['href'=> BASE_URL . '/admin/galeri',    'label'=>'Galeri',     'icon'=>'🖼️', 'page'=>'galeri'],
     ['href'=> BASE_URL . '/admin/faq',       'label'=>'FAQ',        'icon'=>'❓', 'page'=>'faq'],
     ['href'=> BASE_URL . '/admin/pengaturan','label'=>'Pengaturan', 'icon'=>'⚙️', 'page'=>'pengaturan'],
+    ['href'=> BASE_URL . '/admin/akun', 'label'=>'Akun Admin', 'icon'=>'👤', 'page'=>'akun'],
 ];
 ?>
 <!DOCTYPE html>
