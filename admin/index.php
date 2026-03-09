@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
-if (isset($_GET['logout'])) { session_destroy(); redirect('/admin/'); }
-if (isAdminLoggedIn()) redirect('/admin/dashboard');
+if (isset($_GET['logout'])) { session_destroy(); redirect(BASE_URL . '/admin/'); }
+if (isAdminLoggedIn()) redirect(BASE_URL . '/admin/dashboard');
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = clean($_POST['username'] ?? '');
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['admin_id']   = $user['id'];
             $_SESSION['admin_name'] = $user['full_name'];
             $_SESSION['admin_user'] = $user['username'];
-            redirect('/admin/dashboard');
+            redirect(BASE_URL . '/admin/dashboard');
         } else { $error = 'Username atau password salah.'; }
     } else { $error = 'Harap isi semua field.'; }
 }

@@ -6,16 +6,16 @@ $admin_name   = $_SESSION['admin_name'] ?? 'Admin';
 $admin_title  = $admin_title ?? 'Admin Panel';
 
 $nav_items = [
-    ['href'=>'/admin/dashboard','label'=>'Dashboard','icon'=>'🏠','page'=>'dashboard'],
-    ['href'=>'/admin/produk','label'=>'Produk','icon'=>'🌺','page'=>'produk'],
-    ['href'=>'/admin/kategori','label'=>'Kategori','icon'=>'📁','page'=>'kategori'],
-    ['href'=>'/admin/kota','label'=>'Kota','icon'=>'🏙️','page'=>'kota'],
-    ['href'=>'/admin/area','label'=>'Area','icon'=>'📍','page'=>'area'],
-    ['href'=>'/admin/layanan','label'=>'Layanan','icon'=>'⚡','page'=>'layanan'],
-    ['href'=>'/admin/testimoni','label'=>'Testimoni','icon'=>'💬','page'=>'testimoni'],
-    ['href'=>'/admin/galeri','label'=>'Galeri','icon'=>'🖼️','page'=>'galeri'],
-    ['href'=>'/admin/faq','label'=>'FAQ','icon'=>'❓','page'=>'faq'],
-    ['href'=>'/admin/pengaturan','label'=>'Pengaturan','icon'=>'⚙️','page'=>'pengaturan'],
+    ['href'=> BASE_URL . '/admin/dashboard','label'=>'Dashboard','icon'=>'🏠','page'=>'dashboard'],
+    ['href'=> BASE_URL . '/admin/produk','label'=>'Produk','icon'=>'🌺','page'=>'produk'],
+    ['href'=> BASE_URL . '/admin/kategori','label'=>'Kategori','icon'=>'📁','page'=>'kategori'],
+    ['href'=> BASE_URL . '/admin/kota','label'=>'Kota','icon'=>'🏙️','page'=>'kota'],
+    ['href'=> BASE_URL . '/admin/area','label'=>'Area','icon'=>'📍','page'=>'area'],
+    ['href'=> BASE_URL . '/admin/layanan','label'=>'Layanan','icon'=>'⚡','page'=>'layanan'],
+    ['href'=> BASE_URL . '/admin/testimoni','label'=>'Testimoni','icon'=>'💬','page'=>'testimoni'],
+    ['href'=> BASE_URL . '/admin/galeri','label'=>'Galeri','icon'=>'🖼️','page'=>'galeri'],
+    ['href'=> BASE_URL . '/admin/faq','label'=>'FAQ','icon'=>'❓','page'=>'faq'],
+    ['href'=> BASE_URL . '/admin/pengaturan','label'=>'Pengaturan','icon'=>'⚙️','page'=>'pengaturan'],
 ];
 ?>
 <!DOCTYPE html>
@@ -74,7 +74,7 @@ body{font-family:'Lato',sans-serif}
       <div class="w-7 h-7 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 text-xs font-bold"><?= mb_strtoupper(mb_substr($admin_name,0,1)) ?></div>
       <span class="text-xs text-gray-600 truncate"><?= clean($admin_name) ?></span>
     </div>
-    <a href="/admin/?logout=1" class="sidebar-link" style="color:#dc2626">
+    <a href="<?= BASE_URL ?>/admin/?logout=1" class="sidebar-link" style="color:#dc2626">
       <span>🚪</span> Logout
     </a>
   </div>
