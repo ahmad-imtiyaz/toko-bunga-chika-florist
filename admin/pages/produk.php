@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-// SEMUA LOGIKA CRUD DI SINI — SEBELUM ADMIN HEADER (output HTML)
+// SEMUA LOGIKA CRUD DI SINI — SEBELUM ADMIN HEADER
 // ============================================================
 require_once __DIR__ . '/../../includes/config.php';
 requireAdminLogin();
@@ -10,14 +10,24 @@ $action = $_GET['action'] ?? 'list';
 $id     = (int)($_GET['id'] ?? 0);
 $b      = BASE_URL;
 
+// AJAX: simpan urutan drag-and-drop
+if (isset($_POST['reorder']) && !empty($_POST['ids'])) {
+    $ids = array_filter(array_map('intval', explode(',', $_POST['ids'])));
+    $stmt = $pdo->prepare("UPDATE products SET sort_order=? WHERE id=?");
+    foreach (array_values($ids) as $i => $pid) {
+        $stmt->execute([$i + 1, $pid]);
+    }
+    echo json_encode(['ok' => true]);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $price_min = (float)preg_replace('/[^0-9]/', '', $_POST['price_min'] ?? '0');
     $price_max = (float)preg_replace('/[^0-9]/', '', $_POST['price_max'] ?? '0');
 
-    // Validasi harga
     if ($price_max > 0 && $price_min > $price_max) {
-        $_SESSION['error']      = 'Harga minimal tidak boleh lebih besar dari harga maksimal.';
-        $_SESSION['form_data']  = $_POST;
+        $_SESSION['error']     = 'Harga minimal tidak boleh lebih besar dari harga maksimal.';
+        $_SESSION['form_data'] = $_POST;
         $redirect_action = $_POST['action_type'] === 'tambah'
             ? $b . '/admin/produk?action=tambah'
             : $b . '/admin/produk?action=edit&id=' . $id;
@@ -34,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'price_max'   => $price_max,
         'meta_title'  => clean($_POST['meta_title'] ?? ''),
         'meta_desc'   => clean($_POST['meta_desc'] ?? ''),
-        'sort_order'  => (int)($_POST['sort_order'] ?? 0),
         'is_featured' => isset($_POST['is_featured']) ? 1 : 0,
         'is_active'   => isset($_POST['is_active']) ? 1 : 0,
     ];
@@ -49,6 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($_POST['action_type'] === 'tambah') {
+        $max = (int)$pdo->query("SELECT MAX(sort_order) FROM products")->fetchColumn();
+        $data['sort_order'] = $max + 1;
         $cols = implode(',', array_keys($data));
         $vals = ':' . implode(',:', array_keys($data));
         $pdo->prepare("INSERT INTO products ($cols) VALUES ($vals)")->execute($data);
@@ -81,13 +92,14 @@ if (isset($_GET['hapus']) && $id) {
 }
 
 // ============================================================
-// BARU LOAD HEADER SETELAH SEMUA REDIRECT SELESAI
-// ============================================================
 $admin_title = 'Manajemen Produk';
 require_once __DIR__ . '/../includes/admin_header.php';
 
 $allCats = $pdo->query("SELECT id,name,parent_id FROM categories WHERE is_active=1 ORDER BY parent_id IS NOT NULL,sort_order")->fetchAll();
 
+// ============================================================
+// FORM TAMBAH / EDIT
+// ============================================================
 if ($action === 'tambah' || ($action === 'edit' && $id)) {
     $item = [];
     if ($action === 'edit') {
@@ -96,11 +108,8 @@ if ($action === 'tambah' || ($action === 'edit' && $id)) {
         $item = $s->fetch();
     }
 
-    // Ambil form_data dari session jika ada (setelah validasi gagal)
-    $fd = $_SESSION['form_data'] ?? null;
+    $fd      = $_SESSION['form_data'] ?? null;
     unset($_SESSION['form_data']);
-
-    // Nilai harga untuk ditampilkan di form (pakai form_data jika ada, fallback ke DB)
     $val_min = $fd ? preg_replace('/[^0-9]/', '', $fd['price_min'] ?? '0') : ($item['price_min'] ?? 0);
     $val_max = $fd ? preg_replace('/[^0-9]/', '', $fd['price_max'] ?? '0') : ($item['price_max'] ?? 0);
     ?>
@@ -112,7 +121,7 @@ if ($action === 'tambah' || ($action === 'edit' && $id)) {
 
       <?php if (!empty($_SESSION['error'])): ?>
         <div class="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3 mb-4 flex items-center gap-2">
-          <span>⚠️</span> <?= clean($_SESSION['error']) ?>
+          ⚠️ <?= clean($_SESSION['error']) ?>
         </div>
         <?php unset($_SESSION['error']); ?>
       <?php endif; ?>
@@ -146,25 +155,21 @@ if ($action === 'tambah' || ($action === 'edit' && $id)) {
                    value="<?= clean($fd['short_desc'] ?? $item['short_desc'] ?? '') ?>">
           </div>
 
-          <!-- Harga Min -->
           <div>
             <label class="form-label">Harga Minimal (Rp)</label>
             <div class="relative">
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">Rp</span>
-              <input type="text" id="price_min_display" inputmode="numeric"
-                     class="form-input pl-9" placeholder="0"
+              <input type="text" id="price_min_display" inputmode="numeric" class="form-input pl-9" placeholder="0"
                      value="<?= $val_min > 0 ? number_format((float)$val_min, 0, ',', '.') : '' ?>">
               <input type="hidden" name="price_min" id="price_min_raw" value="<?= (int)$val_min ?>">
             </div>
           </div>
 
-          <!-- Harga Max -->
           <div>
             <label class="form-label">Harga Maksimal (Rp) <span class="text-gray-400 font-normal text-xs">(opsional)</span></label>
             <div class="relative">
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">Rp</span>
-              <input type="text" id="price_max_display" inputmode="numeric"
-                     class="form-input pl-9" placeholder="0 = sama dengan minimal"
+              <input type="text" id="price_max_display" inputmode="numeric" class="form-input pl-9" placeholder="kosong = harga tunggal"
                      value="<?= $val_max > 0 ? number_format((float)$val_max, 0, ',', '.') : '' ?>">
               <input type="hidden" name="price_max" id="price_max_raw" value="<?= (int)$val_max ?>">
             </div>
@@ -175,12 +180,6 @@ if ($action === 'tambah' || ($action === 'edit' && $id)) {
             <label class="form-label">Meta Title</label>
             <input type="text" name="meta_title" class="form-input"
                    value="<?= clean($fd['meta_title'] ?? $item['meta_title'] ?? '') ?>">
-          </div>
-
-          <div>
-            <label class="form-label">Sort Order</label>
-            <input type="number" name="sort_order" class="form-input"
-                   value="<?= (int)($fd['sort_order'] ?? $item['sort_order'] ?? 0) ?>">
           </div>
 
           <div class="col-span-2">
@@ -196,7 +195,7 @@ if ($action === 'tambah' || ($action === 'edit' && $id)) {
             <input type="file" name="image" accept="image/*" class="form-input">
           </div>
 
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-4 col-span-2">
             <label class="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" name="is_featured"
                      <?= ($fd ? isset($fd['is_featured']) : ($item['is_featured'] ?? 0)) ? 'checked' : '' ?>>
@@ -218,97 +217,255 @@ if ($action === 'tambah' || ($action === 'edit' && $id)) {
     </div>
 
     <script>
-    // Format angka dengan titik ribuan
     function formatRupiah(val) {
         val = val.replace(/\D/g, '');
         return val.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
-
-    function setupHargaInput(displayId, rawId) {
-        const display = document.getElementById(displayId);
-        const raw     = document.getElementById(rawId);
-        display.addEventListener('input', function () {
-            const clean = this.value.replace(/\D/g, '');
-            this.value  = clean ? formatRupiah(clean) : '';
-            raw.value   = clean || '0';
+    function setupHarga(dispId, rawId) {
+        const disp = document.getElementById(dispId);
+        const raw  = document.getElementById(rawId);
+        disp.addEventListener('input', function() {
+            const n = this.value.replace(/\D/g, '');
+            this.value = n ? formatRupiah(n) : '';
+            raw.value  = n || '0';
             validateHarga();
         });
     }
-
-    setupHargaInput('price_min_display', 'price_min_raw');
-    setupHargaInput('price_max_display', 'price_max_raw');
+    setupHarga('price_min_display','price_min_raw');
+    setupHarga('price_max_display','price_max_raw');
 
     function validateHarga() {
         const min = parseInt(document.getElementById('price_min_raw').value) || 0;
         const max = parseInt(document.getElementById('price_max_raw').value) || 0;
         const err = document.getElementById('price_error');
         const btn = document.getElementById('btnSimpan');
-        if (max > 0 && min > max) {
-            err.classList.remove('hidden');
-            btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-            return false;
-        } else {
-            err.classList.add('hidden');
-            btn.disabled = false;
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-            return true;
-        }
+        const bad = max > 0 && min > max;
+        err.classList.toggle('hidden', !bad);
+        btn.disabled = bad;
+        btn.classList.toggle('opacity-50', bad);
+        btn.classList.toggle('cursor-not-allowed', bad);
+        return !bad;
     }
-
-    document.getElementById('formProduk').addEventListener('submit', function (e) {
+    document.getElementById('formProduk').addEventListener('submit', e => {
         if (!validateHarga()) e.preventDefault();
     });
     </script>
-    <?php
+
+<?php
+// ============================================================
+// LIST VIEW — CARD GRID
+// ============================================================
 } else {
     if (!empty($_SESSION['success'])): ?>
-      <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg px-4 py-3 mb-5 flex items-center gap-2">
-        <span>✅</span> <?= clean($_SESSION['success']) ?>
+      <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg px-4 py-3 mb-4">
+        ✅ <?= clean($_SESSION['success']) ?>
       </div>
     <?php unset($_SESSION['success']); endif;
 
-    $products = $pdo->query("SELECT p.*,c.name as cat_name FROM products p JOIN categories c ON p.category_id=c.id ORDER BY p.is_active DESC,p.sort_order ASC,p.name ASC")->fetchAll();
+    $products = $pdo->query("
+        SELECT p.*, c.name as cat_name, c.id as cat_id
+        FROM products p
+        JOIN categories c ON p.category_id = c.id
+        ORDER BY p.sort_order ASC, p.name ASC
+    ")->fetchAll();
+
+    // Kategori unik untuk filter dropdown
+    $catOptions = [];
+    foreach ($products as $p) {
+        $catOptions[$p['cat_id']] = $p['cat_name'];
+    }
+
+    $total        = count($products);
+    $totalAktif   = count(array_filter($products, fn($p) => $p['is_active']));
+    $totalFeatured = count(array_filter($products, fn($p) => $p['is_featured']));
     ?>
-    <div class="flex justify-between items-center mb-5">
-      <p class="text-sm text-gray-500"><?= count($products) ?> produk</p>
-      <a href="<?= $b ?>/admin/produk?action=tambah" class="btn-primary">+ Tambah Produk</a>
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+      <div>
+        <p class="text-sm text-gray-500">
+          <span class="font-semibold text-gray-700"><?= $total ?></span> produk ·
+          <span class="text-green-600 font-medium"><?= $totalAktif ?> aktif</span> ·
+          <span class="text-amber-600 font-medium">★ <?= $totalFeatured ?> unggulan</span>
+        </p>
+        <p class="text-xs text-gray-400 mt-0.5">⠿ Seret kartu untuk mengubah urutan tampil</p>
+      </div>
+      <a href="<?= $b ?>/admin/produk?action=tambah" class="btn-primary whitespace-nowrap">+ Tambah Produk</a>
     </div>
-    <div class="bg-white rounded-xl border border-rose-100 overflow-hidden">
-      <table class="admin-table w-full">
-        <thead>
-          <tr>
-            <th>Gambar</th><th>Nama Produk</th><th>Kategori</th><th>Harga</th>
-            <th style="text-align:center">Unggulan</th>
-            <th style="text-align:center">Status</th>
-            <th style="text-align:center">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($products as $p): ?>
-        <tr>
-          <td><img src="<?= UPLOAD_URL . ($p['image'] ?? '') ?>" class="w-12 h-10 object-cover rounded-lg" onerror="this.style.display='none'"></td>
-          <td class="font-medium text-gray-800"><?= clean($p['name']) ?></td>
-          <td class="text-gray-500 text-xs"><?= clean($p['cat_name']) ?></td>
-          <td class="text-xs text-rose-600 font-semibold"><?= formatHarga($p['price_min'], $p['price_max']) ?></td>
-          <td style="text-align:center">
-            <?= $p['is_featured'] ? '<span style="color:#d97706;font-size:.8rem;font-weight:bold">★ Ya</span>' : '<span style="color:#d1d5db">-</span>' ?>
-          </td>
-          <td style="text-align:center">
-            <a href="<?= $b ?>/admin/produk?toggle=1&id=<?= $p['id'] ?>">
-              <span class="<?= $p['is_active'] ? 'badge-active' : 'badge-inactive' ?>"><?= $p['is_active'] ? 'Aktif' : 'Nonaktif' ?></span>
-            </a>
-          </td>
-          <td style="text-align:center">
-            <div style="display:flex;gap:4px;justify-content:center">
-              <a href="<?= $b ?>/admin/produk?action=edit&id=<?= $p['id'] ?>" style="font-size:.75rem;background:#fef3c7;color:#b45309;padding:.25rem .75rem;border-radius:.5rem;border:1px solid #fde68a">Edit</a>
-              <a href="<?= $b ?>/admin/produk?hapus=1&id=<?= $p['id'] ?>" onclick="return confirm('Hapus produk ini?')" class="btn-danger">Hapus</a>
-            </div>
-          </td>
-        </tr>
+
+    <!-- Search + Filter -->
+    <div class="flex flex-col sm:flex-row gap-2 mb-5">
+      <div class="relative flex-1">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+        <input type="text" id="searchProduk" placeholder="Cari nama produk..."
+               class="pl-8 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-rose-400 w-full">
+      </div>
+      <select id="filterKat" class="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-rose-400 bg-white">
+        <option value="">Semua Kategori</option>
+        <?php foreach ($catOptions as $cid => $cname): ?>
+        <option value="<?= $cid ?>"><?= clean($cname) ?></option>
         <?php endforeach; ?>
-        </tbody>
-      </table>
+      </select>
+      <select id="filterStatus" class="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-rose-400 bg-white">
+        <option value="">Semua Status</option>
+        <option value="aktif">Aktif</option>
+        <option value="nonaktif">Nonaktif</option>
+        <option value="unggulan">Unggulan</option>
+      </select>
     </div>
+
+    <!-- Toast -->
+    <div id="toastReorder" class="hidden fixed bottom-5 right-5 bg-gray-800 text-white text-sm px-4 py-2.5 rounded-xl shadow-lg z-50">
+      ✅ Urutan berhasil disimpan
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptySearch" class="hidden text-center py-16 text-gray-400">
+      <div class="text-4xl mb-2">🔍</div>
+      <p class="text-sm">Tidak ada produk yang cocok</p>
+    </div>
+
+    <!-- Card Grid -->
+    <div id="produkGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <?php foreach ($products as $i => $p): ?>
+      <div class="prod-card group bg-white border border-rose-100 rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing hover:shadow-lg transition-all duration-200 flex flex-col"
+           data-id="<?= $p['id'] ?>"
+           data-name="<?= strtolower(clean($p['name'])) ?>"
+           data-cat="<?= $p['cat_id'] ?>"
+           data-active="<?= $p['is_active'] ?>"
+           data-featured="<?= $p['is_featured'] ?>">
+
+        <!-- Gambar -->
+        <div class="relative w-full aspect-square bg-rose-50 overflow-hidden">
+          <?php if (!empty($p['image'])): ?>
+            <img src="<?= UPLOAD_URL . $p['image'] ?>"
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                 onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-rose-200 text-5xl\'>🌸</div>'">
+          <?php else: ?>
+            <div class="w-full h-full flex items-center justify-center text-rose-200 text-5xl">🌸</div>
+          <?php endif; ?>
+
+          <!-- Drag handle overlay -->
+          <div class="absolute top-2 left-2 bg-white/80 backdrop-blur-sm rounded-lg px-1.5 py-1 text-gray-400 text-sm select-none opacity-0 group-hover:opacity-100 transition-opacity">⠿</div>
+
+          <!-- Sort order badge -->
+          <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-0.5 text-xs font-bold text-gray-500">
+            #<?= $i + 1 ?>
+          </div>
+
+          <!-- Badge unggulan -->
+          <?php if ($p['is_featured']): ?>
+          <div class="absolute bottom-2 left-2 bg-amber-400 text-white text-xs font-bold px-2 py-0.5 rounded-lg">
+            ★ Unggulan
+          </div>
+          <?php endif; ?>
+
+          <!-- Badge nonaktif -->
+          <?php if (!$p['is_active']): ?>
+          <div class="absolute inset-0 bg-gray-900/40 flex items-center justify-center">
+            <span class="bg-gray-800 text-white text-xs font-bold px-3 py-1 rounded-full">Nonaktif</span>
+          </div>
+          <?php endif; ?>
+        </div>
+
+        <!-- Info -->
+        <div class="p-3 flex flex-col flex-1">
+          <p class="font-semibold text-gray-800 text-sm leading-snug line-clamp-2 mb-1"><?= clean($p['name']) ?></p>
+          <p class="text-xs text-rose-400 mb-1">📁 <?= clean($p['cat_name']) ?></p>
+          <p class="text-sm font-bold text-rose-600 mb-3"><?= formatHarga($p['price_min'], $p['price_max']) ?></p>
+
+          <!-- Aksi -->
+          <div class="flex items-center gap-1.5 mt-auto flex-wrap">
+            <a href="<?= $b ?>/admin/produk?action=edit&id=<?= $p['id'] ?>"
+               class="flex-1 text-center text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-1 rounded-lg hover:bg-amber-100 font-medium">
+              ✏️ Edit
+            </a>
+            <a href="<?= $b ?>/admin/produk?toggle=1&id=<?= $p['id'] ?>"
+               class="flex-1 text-center text-xs bg-gray-50 text-gray-600 border border-gray-200 px-2 py-1 rounded-lg hover:bg-gray-100">
+              <?= $p['is_active'] ? '🔕 Nonaktif' : '✅ Aktifkan' ?>
+            </a>
+            <a href="<?= $b ?>/admin/produk?hapus=1&id=<?= $p['id'] ?>"
+               onclick="return confirm('Hapus produk \'<?= clean($p['name']) ?>\'?')"
+               class="text-xs text-red-400 hover:text-red-600 px-1 py-1 rounded-lg hover:bg-red-50 border border-transparent hover:border-red-100">
+              🗑️
+            </a>
+          </div>
+        </div>
+      </div>
+      <?php endforeach; ?>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+    <script>
+    // ── Toast ─────────────────────────────────────────────────
+    function showToast() {
+        const t = document.getElementById('toastReorder');
+        t.classList.remove('hidden');
+        clearTimeout(t._t);
+        t._t = setTimeout(() => t.classList.add('hidden'), 2500);
+    }
+
+    // ── Sortable ─────────────────────────────────────────────
+    const grid = document.getElementById('produkGrid');
+    Sortable.create(grid, {
+        animation: 200,
+        ghostClass: 'opacity-30',
+        handle: '.prod-card',
+        filter: 'a, button',
+        preventOnFilter: false,
+        onEnd() {
+            // Update badge nomor urut
+            grid.querySelectorAll('.prod-card:not([style*="display: none"])').forEach((card, i) => {
+                const badge = card.querySelector('.absolute.top-2.right-2');
+                if (badge) badge.textContent = '#' + (i + 1);
+            });
+            // Kirim semua ID yang visible
+            const ids = [...grid.querySelectorAll('.prod-card')]
+                        .filter(c => c.style.display !== 'none')
+                        .map(c => c.dataset.id).join(',');
+            fetch('', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'reorder=1&ids=' + ids
+            }).then(r => r.json()).then(d => { if (d.ok) showToast(); });
+        }
+    });
+
+    // ── Filter & Search ───────────────────────────────────────
+    function applyFilter() {
+        const q      = document.getElementById('searchProduk').value.toLowerCase().trim();
+        const katVal = document.getElementById('filterKat').value;
+        const stVal  = document.getElementById('filterStatus').value;
+        let visible  = 0;
+
+        document.querySelectorAll('.prod-card').forEach((card, i) => {
+            const nameMatch   = !q      || card.dataset.name.includes(q);
+            const katMatch    = !katVal || card.dataset.cat === katVal;
+            const statusMatch = !stVal
+                || (stVal === 'aktif'    && card.dataset.active   === '1')
+                || (stVal === 'nonaktif' && card.dataset.active   === '0')
+                || (stVal === 'unggulan' && card.dataset.featured === '1');
+
+            const show = nameMatch && katMatch && statusMatch;
+            card.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        // Re-nomor badge
+        let num = 1;
+        document.querySelectorAll('.prod-card').forEach(card => {
+            if (card.style.display !== 'none') {
+                const badge = card.querySelector('.absolute.top-2.right-2');
+                if (badge) badge.textContent = '#' + num++;
+            }
+        });
+
+        document.getElementById('emptySearch').classList.toggle('hidden', visible > 0);
+    }
+
+    document.getElementById('searchProduk').addEventListener('input', applyFilter);
+    document.getElementById('filterKat').addEventListener('change', applyFilter);
+    document.getElementById('filterStatus').addEventListener('change', applyFilter);
+    </script>
 <?php } ?>
 <?php require_once __DIR__ . '/../includes/admin_footer.php'; ?>
