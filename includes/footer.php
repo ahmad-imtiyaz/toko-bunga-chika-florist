@@ -15,7 +15,7 @@ $mainCats    = getMainCategories();
       <p class="text-xs text-gray-500 uppercase tracking-widest mb-4 font-semibold">Area Layanan Populer</p>
       <div class="flex flex-wrap gap-x-3 gap-y-2">
         <?php foreach ($allCities as $i => $city): ?>
-        <a href="/toko-bunga-<?= $city['slug'] ?>" class="text-sm text-gray-400 hover:text-rose-400 transition-colors">Toko Bunga <?= clean($city['name']) ?></a>
+        <a href="<?= BASE_URL ?>/toko-bunga-<?= $city['slug'] ?>" class="text-sm text-gray-400 hover:text-rose-400 transition-colors">Toko Bunga <?= clean($city['name']) ?></a>
         <?php if ($i < count($allCities)-1): ?><span class="text-gray-700 text-xs self-center">|</span><?php endif; ?>
         <?php endforeach; ?>
       </div>
@@ -28,7 +28,7 @@ $mainCats    = getMainCategories();
 
     <!-- Brand -->
     <div>
-      <a href="/" class="inline-block mb-4">
+      <a href="<?= BASE_URL ?>/" class="inline-block mb-4">
         <img src="<?= UPLOAD_URL . getSetting('logo','logo.jpeg') ?>" alt="<?= clean($site_name) ?>"
              class="h-12 w-auto object-contain brightness-0 invert opacity-90"
              onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
@@ -57,7 +57,7 @@ $mainCats    = getMainCategories();
       <h4 class="text-white font-semibold mb-4 font-display">Produk Bunga</h4>
       <ul class="space-y-2 text-sm">
         <?php foreach ($mainCats as $cat): ?>
-        <li><a href="/<?= $cat['slug'] ?>" class="text-gray-400 hover:text-rose-400 transition-colors"><?= clean($cat['name']) ?></a></li>
+        <li><a href="<?= BASE_URL ?>/<?= $cat['slug'] ?>" class="text-gray-400 hover:text-rose-400 transition-colors"><?= clean($cat['name']) ?></a></li>
         <?php endforeach; ?>
       </ul>
     </div>
@@ -66,11 +66,11 @@ $mainCats    = getMainCategories();
     <div>
       <h4 class="text-white font-semibold mb-4 font-display">Layanan</h4>
       <ul class="space-y-2 text-sm">
-        <li><a href="/toko-bunga-online-24-jam-indonesia" class="text-gray-400 hover:text-rose-400 transition-colors">Toko Bunga Online 24 Jam</a></li>
-        <li><a href="/kirim-bunga-hari-ini" class="text-gray-400 hover:text-rose-400 transition-colors">Kirim Bunga Hari Ini</a></li>
-        <li><a href="/florist-terdekat" class="text-gray-400 hover:text-rose-400 transition-colors">Florist Terdekat</a></li>
-        <li><a href="/pesan-bunga-online" class="text-gray-400 hover:text-rose-400 transition-colors">Pesan Bunga Online</a></li>
-        <li><a href="/area-layanan" class="text-gray-400 hover:text-rose-400 transition-colors">Semua Area Layanan</a></li>
+        <li><a href="<?= BASE_URL ?>/toko-bunga-online-24-jam-indonesia" class="text-gray-400 hover:text-rose-400 transition-colors">Toko Bunga Online 24 Jam</a></li>
+        <li><a href="<?= BASE_URL ?>/kirim-bunga-hari-ini" class="text-gray-400 hover:text-rose-400 transition-colors">Kirim Bunga Hari Ini</a></li>
+        <li><a href="<?= BASE_URL ?>/florist-terdekat" class="text-gray-400 hover:text-rose-400 transition-colors">Florist Terdekat</a></li>
+        <li><a href="<?= BASE_URL ?>/pesan-bunga-online" class="text-gray-400 hover:text-rose-400 transition-colors">Pesan Bunga Online</a></li>
+        <li><a href="<?= BASE_URL ?>/area-layanan" class="text-gray-400 hover:text-rose-400 transition-colors">Semua Area Layanan</a></li>
       </ul>
     </div>
 
@@ -79,10 +79,10 @@ $mainCats    = getMainCategories();
       <h4 class="text-white font-semibold mb-4 font-display">Kota Populer</h4>
       <ul class="space-y-2 text-sm">
         <?php foreach (array_slice($allCities, 0, 8) as $city): ?>
-        <li><a href="/toko-bunga-<?= $city['slug'] ?>" class="text-gray-400 hover:text-rose-400 transition-colors">Toko Bunga <?= clean($city['name']) ?></a></li>
+        <li><a href="<?= BASE_URL ?>/toko-bunga-<?= $city['slug'] ?>" class="text-gray-400 hover:text-rose-400 transition-colors">Toko Bunga <?= clean($city['name']) ?></a></li>
         <?php endforeach; ?>
         <?php if (count($allCities) > 8): ?>
-        <li><a href="/area-layanan" class="text-rose-400 hover:text-rose-300 text-xs transition-colors">+ <?= count($allCities)-8 ?> kota lainnya →</a></li>
+        <li><a href="<?= BASE_URL ?>/area-layanan" class="text-rose-400 hover:text-rose-300 text-xs transition-colors">+ <?= count($allCities)-8 ?> kota lainnya →</a></li>
         <?php endif; ?>
       </ul>
     </div>
@@ -92,7 +92,7 @@ $mainCats    = getMainCategories();
   <div class="border-t border-gray-800 py-5 px-4">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-500">
       <p>© <?= date('Y') ?> <?= clean($site_name) ?>. All rights reserved.</p>
-      <p><a href="/toko-bunga-online-24-jam-indonesia" class="hover:text-rose-400 transition-colors">Toko Bunga Online 24 Jam Indonesia</a></p>
+      <p><a href="<?= BASE_URL ?>/toko-bunga-online-24-jam-indonesia" class="hover:text-rose-400 transition-colors">Toko Bunga Online 24 Jam Indonesia</a></p>
     </div>
   </div>
 </footer>
