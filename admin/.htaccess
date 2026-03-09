@@ -1,0 +1,10 @@
+Options -Indexes
+RewriteEngine On
+
+# Jangan rewrite file/folder yang ada
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Semua request admin ke router.php
+RewriteRule ^ router.php [L]

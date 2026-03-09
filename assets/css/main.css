@@ -1,0 +1,30 @@
+/* CHIKA FLORIST - Custom CSS | Tema: Taman Bunga */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#fdf8f0}
+::-webkit-scrollbar-thumb{background:#fda4af;border-radius:3px}
+
+h1,h2,h3,.font-display{font-family:'Playfair Display',Georgia,serif}
+.section-padding{padding:4rem 1rem}
+@media(min-width:768px){.section-padding{padding:5rem 1.5rem}}
+
+.card-hover{transition:box-shadow .2s ease,transform .2s ease}
+.card-hover:hover{box-shadow:0 8px 25px rgba(244,63,94,.12);transform:translateY(-2px)}
+
+.seo-content h2{font-family:'Playfair Display',Georgia,serif;font-size:1.35rem;font-weight:700;color:#be123c;margin:2rem 0 .75rem;padding-bottom:.4rem;border-bottom:2px solid #ffe4e6}
+.seo-content h3{font-family:'Playfair Display',Georgia,serif;font-size:1.05rem;font-weight:600;color:#881337;margin:1.25rem 0 .5rem}
+.seo-content p{color:#374151;line-height:1.75;margin-bottom:.75rem}
+.seo-content ul{list-style:none;padding:0}
+.seo-content ul li{padding:.3rem 0 .3rem 1.4rem;position:relative;color:#374151;line-height:1.6}
+.seo-content ul li::before{content:'✓';position:absolute;left:0;color:#e11d48;font-weight:bold}
+.seo-content a{color:#e11d48;text-decoration:underline;text-underline-offset:2px}
+.seo-content a:hover{color:#9f1239}
+
+.internal-links a{display:inline-block;padding:.3rem .75rem;margin:.2rem;border:1px solid #fecdd3;border-radius:1rem;color:#e11d48;font-size:.85rem;background:#fff1f2;transition:background .15s,color .15s}
+.internal-links a:hover{background:#e11d48;color:white;border-color:#e11d48}
+
+.form-input{width:100%;padding:.55rem .85rem;border:1.5px solid #fecdd3;border-radius:.5rem;font-size:.875rem;color:#374151;outline:none;transition:border-color .15s}
+.form-input:focus{border-color:#e11d48;box-shadow:0 0 0 3px rgba(225,29,72,.08)}
+.form-label{display:block;font-size:.85rem;font-weight:600;color:#374151;margin-bottom:.35rem}
+
+.badge-active{background:#dcfce7;color:#15803d;font-size:.7rem;padding:.15rem .6rem;border-radius:9999px;font-weight:600;display:inline-block}
+.badge-inactive{background:#fef2f2;color:#dc2626;font-size:.7rem;padding:.15rem .6rem;border-radius:9999px;font-weight:600;display:inline-block}
