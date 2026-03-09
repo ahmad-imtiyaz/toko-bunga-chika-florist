@@ -6,16 +6,16 @@ $admin_name   = $_SESSION['admin_name'] ?? 'Admin';
 $admin_title  = $admin_title ?? 'Admin Panel';
 
 $nav_items = [
-    ['href'=> BASE_URL . '/admin/dashboard','label'=>'Dashboard','icon'=>'🏠','page'=>'dashboard'],
-    ['href'=> BASE_URL . '/admin/produk','label'=>'Produk','icon'=>'🌺','page'=>'produk'],
-    ['href'=> BASE_URL . '/admin/kategori','label'=>'Kategori','icon'=>'📁','page'=>'kategori'],
-    ['href'=> BASE_URL . '/admin/kota','label'=>'Kota','icon'=>'🏙️','page'=>'kota'],
-    ['href'=> BASE_URL . '/admin/area','label'=>'Area','icon'=>'📍','page'=>'area'],
-    ['href'=> BASE_URL . '/admin/layanan','label'=>'Layanan','icon'=>'⚡','page'=>'layanan'],
-    ['href'=> BASE_URL . '/admin/testimoni','label'=>'Testimoni','icon'=>'💬','page'=>'testimoni'],
-    ['href'=> BASE_URL . '/admin/galeri','label'=>'Galeri','icon'=>'🖼️','page'=>'galeri'],
-    ['href'=> BASE_URL . '/admin/faq','label'=>'FAQ','icon'=>'❓','page'=>'faq'],
-    ['href'=> BASE_URL . '/admin/pengaturan','label'=>'Pengaturan','icon'=>'⚙️','page'=>'pengaturan'],
+    ['href'=> BASE_URL . '/admin/dashboard', 'label'=>'Dashboard',  'icon'=>'🏠', 'page'=>'dashboard'],
+    ['href'=> BASE_URL . '/admin/produk',    'label'=>'Produk',     'icon'=>'🌺', 'page'=>'produk'],
+    ['href'=> BASE_URL . '/admin/kategori',  'label'=>'Kategori',   'icon'=>'📁', 'page'=>'kategori'],
+    ['href'=> BASE_URL . '/admin/kota',      'label'=>'Kota',       'icon'=>'🏙️', 'page'=>'kota'],
+    ['href'=> BASE_URL . '/admin/area',      'label'=>'Area',       'icon'=>'📍', 'page'=>'area'],
+    ['href'=> BASE_URL . '/admin/layanan',   'label'=>'Layanan',    'icon'=>'⚡', 'page'=>'layanan'],
+    ['href'=> BASE_URL . '/admin/testimoni', 'label'=>'Testimoni',  'icon'=>'💬', 'page'=>'testimoni'],
+    ['href'=> BASE_URL . '/admin/galeri',    'label'=>'Galeri',     'icon'=>'🖼️', 'page'=>'galeri'],
+    ['href'=> BASE_URL . '/admin/faq',       'label'=>'FAQ',        'icon'=>'❓', 'page'=>'faq'],
+    ['href'=> BASE_URL . '/admin/pengaturan','label'=>'Pengaturan', 'icon'=>'⚙️', 'page'=>'pengaturan'],
 ];
 ?>
 <!DOCTYPE html>
@@ -54,7 +54,7 @@ body{font-family:'Lato',sans-serif}
 <!-- Sidebar -->
 <aside class="w-56 bg-white border-r border-rose-100 flex flex-col fixed h-full z-30 shadow-sm">
   <div class="p-4 border-b border-rose-100">
-    <a href="/admin/dashboard" class="flex items-center gap-2">
+    <a href="<?= BASE_URL ?>/admin/dashboard" class="flex items-center gap-2">
       <div class="w-8 h-8 bg-rose-600 rounded-lg flex items-center justify-center"><span class="text-white text-sm">🌸</span></div>
       <div>
         <p class="font-display font-bold text-gray-900 text-sm leading-tight">Chika Florist</p>
@@ -84,7 +84,7 @@ body{font-family:'Lato',sans-serif}
 <main class="flex-1 ml-56">
   <div class="bg-white border-b border-rose-100 px-6 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
     <h1 class="font-display font-bold text-gray-800 text-base"><?= clean($admin_title) ?></h1>
-    <a href="/" target="_blank" class="text-rose-600 hover:underline text-xs">Lihat Website →</a>
+    <a href="<?= BASE_URL ?>/" target="_blank" class="text-rose-600 hover:underline text-xs">Lihat Website →</a>
   </div>
 
   <?php if (!empty($_SESSION['success'])): ?>

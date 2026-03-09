@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 $pdo    = getDB();
 $action = $_GET['action'] ?? 'list';
 $id     = (int)($_GET['id'] ?? 0);
+$b      = BASE_URL;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [
@@ -38,16 +39,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->prepare("UPDATE products SET $sets WHERE id=:id")->execute($data);
         $_SESSION['success'] = 'Produk berhasil diperbarui.';
     }
-    redirect('/admin/produk');
+    redirect($b . '/admin/produk');
 }
 if (isset($_GET['toggle']) && $id) {
     $cur = $pdo->prepare("SELECT is_active FROM products WHERE id=?"); $cur->execute([$id]);
     $pdo->prepare("UPDATE products SET is_active=? WHERE id=?")->execute([$cur->fetchColumn()?0:1,$id]);
-    redirect('/admin/produk');
+    redirect($b . '/admin/produk');
 }
 if (isset($_GET['hapus']) && $id) {
     $pdo->prepare("DELETE FROM products WHERE id=?")->execute([$id]);
-    $_SESSION['success'] = 'Produk berhasil dihapus.'; redirect('/admin/produk');
+    $_SESSION['success'] = 'Produk berhasil dihapus.';
+    redirect($b . '/admin/produk');
 }
 
 $allCats = $pdo->query("SELECT id,name,parent_id FROM categories WHERE is_active=1 ORDER BY parent_id IS NOT NULL,sort_order")->fetchAll();
@@ -58,7 +60,7 @@ if ($action === 'tambah' || ($action === 'edit' && $id)) {
     ?>
     <div class="max-w-2xl">
       <div class="flex items-center gap-3 mb-5">
-        <a href="/admin/produk" class="text-gray-400 hover:text-rose-600">← Kembali</a>
+        <a href="<?= $b ?>/admin/produk" class="text-gray-400 hover:text-rose-600">← Kembali</a>
         <h2 class="font-display font-bold text-gray-800"><?= $action==='tambah'?'Tambah':'Edit' ?> Produk</h2>
       </div>
       <form method="POST" enctype="multipart/form-data" class="bg-white rounded-xl border border-rose-100 p-6 space-y-4">
@@ -92,7 +94,7 @@ if ($action === 'tambah' || ($action === 'edit' && $id)) {
         </div>
         <div class="flex gap-2 pt-2">
           <button type="submit" class="btn-primary">Simpan Produk</button>
-          <a href="/admin/produk" class="btn-secondary">Batal</a>
+          <a href="<?= $b ?>/admin/produk" class="btn-secondary">Batal</a>
         </div>
       </form>
     </div>
@@ -102,7 +104,7 @@ if ($action === 'tambah' || ($action === 'edit' && $id)) {
     ?>
     <div class="flex justify-between items-center mb-5">
       <p class="text-sm text-gray-500"><?= count($products) ?> produk</p>
-      <a href="/admin/produk?action=tambah" class="btn-primary">+ Tambah Produk</a>
+      <a href="<?= $b ?>/admin/produk?action=tambah" class="btn-primary">+ Tambah Produk</a>
     </div>
     <div class="bg-white rounded-xl border border-rose-100 overflow-hidden">
       <table class="admin-table w-full">
@@ -115,11 +117,15 @@ if ($action === 'tambah' || ($action === 'edit' && $id)) {
           <td class="text-gray-500 text-xs"><?= clean($p['cat_name']) ?></td>
           <td class="text-xs text-rose-600 font-semibold"><?= formatHarga($p['price_min'],$p['price_max']) ?></td>
           <td style="text-align:center"><?= $p['is_featured']?'<span style="color:#d97706;font-size:.8rem;font-weight:bold">★ Ya</span>':'<span style="color:#d1d5db">-</span>' ?></td>
-          <td style="text-align:center"><a href="/admin/produk?toggle=1&id=<?= $p['id'] ?>"><span class="<?= $p['is_active']?'badge-active':'badge-inactive' ?>"><?= $p['is_active']?'Aktif':'Nonaktif' ?></span></a></td>
+          <td style="text-align:center">
+            <a href="<?= $b ?>/admin/produk?toggle=1&id=<?= $p['id'] ?>">
+              <span class="<?= $p['is_active']?'badge-active':'badge-inactive' ?>"><?= $p['is_active']?'Aktif':'Nonaktif' ?></span>
+            </a>
+          </td>
           <td style="text-align:center">
             <div style="display:flex;gap:4px;justify-content:center">
-              <a href="/admin/produk?action=edit&id=<?= $p['id'] ?>" style="font-size:.75rem;background:#fef3c7;color:#b45309;padding:.25rem .75rem;border-radius:.5rem;border:1px solid #fde68a">Edit</a>
-              <a href="/admin/produk?hapus=1&id=<?= $p['id'] ?>" onclick="return confirm('Hapus produk ini?')" class="btn-danger">Hapus</a>
+              <a href="<?= $b ?>/admin/produk?action=edit&id=<?= $p['id'] ?>" style="font-size:.75rem;background:#fef3c7;color:#b45309;padding:.25rem .75rem;border-radius:.5rem;border:1px solid #fde68a">Edit</a>
+              <a href="<?= $b ?>/admin/produk?hapus=1&id=<?= $p['id'] ?>" onclick="return confirm('Hapus produk ini?')" class="btn-danger">Hapus</a>
             </div>
           </td>
         </tr>

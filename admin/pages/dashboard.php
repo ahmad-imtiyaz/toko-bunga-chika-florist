@@ -10,55 +10,14 @@ $stats = [
     'testimoni'=> $pdo->query("SELECT COUNT(*) FROM testimonials WHERE is_active=1")->fetchColumn(),
     'galeri'   => $pdo->query("SELECT COUNT(*) FROM gallery WHERE is_active=1")->fetchColumn(),
 ];
+$b = BASE_URL;
 $cards = [
-    [
-        'label' => 'Produk Aktif',
-        'value' => $stats['produk'],
-        'icon'  => '🌺',
-        'bg'    => 'bg-rose-50 border-rose-200',
-        'text'  => 'text-rose-600',
-        'link'  => BASE_URL . '/admin/produk'
-    ],
-    [
-        'label' => 'Kategori',
-        'value' => $stats['kategori'],
-        'icon'  => '📁',
-        'bg'    => 'bg-amber-50 border-amber-200',
-        'text'  => 'text-amber-600',
-        'link'  => BASE_URL . '/admin/kategori'
-    ],
-    [
-        'label' => 'Kota',
-        'value' => $stats['kota'],
-        'icon'  => '🏙️',
-        'bg'    => 'bg-blue-50 border-blue-200',
-        'text'  => 'text-blue-600',
-        'link'  => BASE_URL . '/admin/kota'
-    ],
-    [
-        'label' => 'Area',
-        'value' => $stats['area'],
-        'icon'  => '📍',
-        'bg'    => 'bg-green-50 border-green-200',
-        'text'  => 'text-green-600',
-        'link'  => BASE_URL . '/admin/area'
-    ],
-    [
-        'label' => 'Testimoni',
-        'value' => $stats['testimoni'],
-        'icon'  => '💬',
-        'bg'    => 'bg-purple-50 border-purple-200',
-        'text'  => 'text-purple-600',
-        'link'  => BASE_URL . '/admin/testimoni'
-    ],
-    [
-        'label' => 'Galeri',
-        'value' => $stats['galeri'],
-        'icon'  => '🖼️',
-        'bg'    => 'bg-pink-50 border-pink-200',
-        'text'  => 'text-pink-600',
-        'link'  => BASE_URL . '/admin/galeri'
-    ],
+    ['label'=>'Produk Aktif', 'value'=>$stats['produk'],   'icon'=>'🌺', 'bg'=>'bg-rose-50 border-rose-200',   'text'=>'text-rose-600',   'link'=>"$b/admin/produk"],
+    ['label'=>'Kategori',     'value'=>$stats['kategori'], 'icon'=>'📁', 'bg'=>'bg-amber-50 border-amber-200', 'text'=>'text-amber-600',  'link'=>"$b/admin/kategori"],
+    ['label'=>'Kota',         'value'=>$stats['kota'],     'icon'=>'🏙️', 'bg'=>'bg-blue-50 border-blue-200',   'text'=>'text-blue-600',   'link'=>"$b/admin/kota"],
+    ['label'=>'Area',         'value'=>$stats['area'],     'icon'=>'📍', 'bg'=>'bg-green-50 border-green-200', 'text'=>'text-green-600',  'link'=>"$b/admin/area"],
+    ['label'=>'Testimoni',    'value'=>$stats['testimoni'],'icon'=>'💬', 'bg'=>'bg-purple-50 border-purple-200','text'=>'text-purple-600', 'link'=>"$b/admin/testimoni"],
+    ['label'=>'Galeri',       'value'=>$stats['galeri'],   'icon'=>'🖼️', 'bg'=>'bg-pink-50 border-pink-200',   'text'=>'text-pink-600',   'link'=>"$b/admin/galeri"],
 ];
 ?>
 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
@@ -74,12 +33,12 @@ $cards = [
 <div class="bg-white rounded-xl border border-rose-100 p-5 mb-6">
   <h2 class="font-display font-bold text-gray-800 mb-4 text-sm">Aksi Cepat</h2>
   <div class="flex flex-wrap gap-2">
-    <a href="<?= BASE_URL ?>/admin/produk?action=tambah" class="btn-primary text-xs px-3 py-1.5">+ Tambah Produk</a>
-    <a href="<?= BASE_URL ?>/admin/kota?action=tambah" class="btn-secondary text-xs px-3 py-1.5">+ Tambah Kota</a>
-    <a href="<?= BASE_URL ?>/admin/area?action=tambah" class="btn-secondary text-xs px-3 py-1.5">+ Tambah Area</a>
-    <a href="<?= BASE_URL ?>/admin/kategori?action=tambah" class="btn-secondary text-xs px-3 py-1.5">+ Tambah Kategori</a>
-    <a href="<?= BASE_URL ?>/admin/galeri?action=tambah" class="btn-secondary text-xs px-3 py-1.5">+ Upload Galeri</a>
-    <a href="<?= BASE_URL ?>/admin/pengaturan" class="btn-secondary text-xs px-3 py-1.5">⚙️ Pengaturan</a>
+    <a href="<?= $b ?>/admin/produk?action=tambah"    class="btn-primary text-xs px-3 py-1.5">+ Tambah Produk</a>
+    <a href="<?= $b ?>/admin/kota?action=tambah"      class="btn-secondary text-xs px-3 py-1.5">+ Tambah Kota</a>
+    <a href="<?= $b ?>/admin/area?action=tambah"      class="btn-secondary text-xs px-3 py-1.5">+ Tambah Area</a>
+    <a href="<?= $b ?>/admin/kategori?action=tambah"  class="btn-secondary text-xs px-3 py-1.5">+ Tambah Kategori</a>
+    <a href="<?= $b ?>/admin/galeri?action=tambah"    class="btn-secondary text-xs px-3 py-1.5">+ Upload Galeri</a>
+    <a href="<?= $b ?>/admin/pengaturan"              class="btn-secondary text-xs px-3 py-1.5">⚙️ Pengaturan</a>
   </div>
 </div>
 
