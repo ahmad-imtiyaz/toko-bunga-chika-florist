@@ -2,6 +2,7 @@
 require_once __DIR__ . '/config.php';
 
 $site_name      = getSetting('site_name', 'Chika Florist');
+$site_tagline   = getSetting('site_tagline', '');
 $page_title     = $page_title ?? getSetting('meta_title_home');
 $meta_desc      = $meta_desc  ?? getSetting('meta_desc_home');
 $canonical      = $canonical_url ?? currentUrl();
@@ -52,11 +53,20 @@ tailwind.config = {
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 <div class="flex items-center justify-between h-16">
 
-  <!-- Logo -->
-  <a href="<?= $base ?>/" class="flex items-center gap-2 shrink-0">
-    <img src="<?= UPLOAD_URL . $logo ?>" alt="<?= clean($site_name) ?>" class="h-10 w-auto object-contain"
-         onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-    <span class="font-display text-xl font-bold text-rose-700" style="display:none"><?= clean($site_name) ?></span>
+  <!-- Logo + Nama Website -->
+  <a href="<?= $base ?>/" class="flex items-center gap-3 shrink-0">
+    <!-- Logo gambar -->
+    <img src="<?= UPLOAD_URL . $logo ?>" alt="<?= clean($site_name) ?>"
+         class="h-10 w-auto object-contain"
+         id="navLogo"
+         onerror="this.style.display='none'">
+    <!-- Nama + tagline -->
+    <div class="leading-tight">
+      <p class="font-display font-bold text-rose-700 text-lg leading-none"><?= clean($site_name) ?></p>
+      <?php if ($site_tagline): ?>
+      <p class="text-xs text-gray-400 mt-0.5 leading-none hidden sm:block"><?= clean($site_tagline) ?></p>
+      <?php endif; ?>
+    </div>
   </a>
 
   <!-- Nav Desktop -->
