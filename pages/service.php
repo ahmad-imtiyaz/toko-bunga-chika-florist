@@ -309,15 +309,19 @@ require_once __DIR__ . '/../includes/header.php';
 .svc-main {
   max-width:1200px;
   margin:0 auto;
-  padding: 3.5rem 1.5rem;
+ padding: 2rem 1rem;      
   display:grid;
-  grid-template-columns: 1fr 320px;
+ grid-template-columns: 1fr;
   gap:2.5rem;
   align-items:start;
 }
 @media(max-width:900px){
   .svc-main { grid-template-columns:1fr; }
-  .svc-sidebar { order:-1; }
+  .svc-sidebar { 
+     order: 2;
+    position: static;          /* ← hapus sticky di mobile */
+    top: auto;
+   }
 }
 
 /* ── ARTICLE CONTENT ─────────────────────────── */
@@ -553,7 +557,7 @@ require_once __DIR__ . '/../includes/header.php';
 .svc-wa-card {
   background: linear-gradient(135deg, #1c1c1c 0%, var(--burg2) 100%);
   border-radius:20px;
-  padding:1.8rem 1.5rem;
+    padding: 1.4rem 1.2rem;
   text-align:center;
   margin-bottom:1.5rem;
   position:relative;
@@ -609,6 +613,8 @@ require_once __DIR__ . '/../includes/header.php';
 
 /* City chips card */
 .svc-city-card {
+  max-height: 200px;
+   overflow-y: auto;
   background:white;
   border:1px solid rgba(201,168,76,0.2);
   border-radius:20px;
@@ -676,110 +682,244 @@ require_once __DIR__ . '/../includes/header.php';
   margin:0;
 }
 
-/* ── CTA FINAL ───────────────────────────────── */
+/* ══════════════════════════════════════
+   CTA FINAL — BRIGHT GARDEN FLORAL
+   ══════════════════════════════════════ */
+
 .svc-cta-final {
-  position:relative;
-  background: linear-gradient(135deg, var(--burg) 0%, var(--burg2) 50%, #5c1a2e 100%);
-  padding: 5rem 1.5rem;
-  overflow:hidden;
-  text-align:center;
-}
-.svc-cta-final::before {
-  content:'';
-  position:absolute;
-  inset:0;
-  background-image:
-    linear-gradient(rgba(201,168,76,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201,168,76,0.06) 1px, transparent 1px);
-  background-size:40px 40px;
-  pointer-events:none;
+  position: relative;
+  padding: 6rem 1.5rem 5.5rem;
+  overflow: hidden;
+  text-align: center;
+  background: #faf5f0;
+  isolation: isolate;
 }
 
-/* Stars */
-.svc-cta-stars {
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  overflow:hidden;
+/* Layer 1 — foto panjang.jpg */
+.svc-cta-final-bgimg {
+  position: absolute;
+  inset: 0;
+  background-image: url('<?= BASE_URL ?>/assets/images/panjang.jpg');
+  background-size: cover;
+  background-position: center 30%;
+  background-attachment: fixed;  /* ← ini yang bikin "keseret" saat scroll */
+  opacity: 0.50;                 /* ← naikkan sesuai selera, 0.25–0.35 bagus */
+  z-index: 1;
 }
-.svc-cta-star {
-  position:absolute;
-  width:2px; height:2px;
-  background:white;
-  border-radius:50%;
-  animation: svc-twinkle var(--d,3s) infinite alternate;
-  opacity: var(--o, 0.5);
+@media (max-width: 768px) {
+  .svc-cta-final-bgimg {
+    background-attachment: scroll; /* fallback mobile */
+  }
 }
-@keyframes svc-twinkle { from { opacity:0.1; transform:scale(0.8); } to { opacity:0.9; transform:scale(1.2); } }
+/* Layer 2 — gradient warm cream overlay */
+.svc-cta-final-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(255,235,230,0.72) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 20% 100%,  rgba(220,240,210,0.55) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 80% 100%,  rgba(255,220,230,0.45) 0%, transparent 65%),
+   linear-gradient(180deg, rgba(253,249,244,0.45) 0%, rgba(252,245,240,0.55) 50%, rgba(250,245,240,0.65) 100%);
+}
 
+/* Layer 3 — orbs lembut */
+.svc-cta-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Wave atas — transisi dari konten ke CTA */
+.svc-cta-final-wave-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  line-height: 0;
+  z-index: 4;
+}
+.svc-cta-final-wave-top svg { display: block; width: 100%; }
+
+/* Konten utama */
 .svc-cta-inner {
-  position:relative;
-  z-index:1;
-  max-width:600px;
-  margin:0 auto;
+  position: relative;
+  z-index: 10;
+  max-width: 640px;
+  margin: 0 auto;
 }
-.svc-cta-inner .svc-eyebrow {
-  background: rgba(201,168,76,0.15);
-  border-color: rgba(201,168,76,0.3);
-  margin-bottom:1.2rem;
+
+/* Eyebrow badge */
+.svc-cta-final .svc-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a5a4a;
+  background: rgba(255,255,255,0.80);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(192,72,90,0.22);
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  margin-bottom: 1.4rem;
+  box-shadow: 0 2px 12px rgba(192,72,90,0.08);
 }
+.svc-cta-final .svc-eyebrow svg { color: #c0485a; }
+
+/* Judul */
 .svc-cta-inner h2 {
-  font-family:'Cormorant Garamond',serif;
-  font-size:clamp(1.8rem, 4vw, 2.8rem);
-  font-weight:600;
-  color:white;
-  margin-bottom:0.8rem;
-  line-height:1.2;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+  font-weight: 600;
+  color: #2e1a16;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
 }
 .svc-cta-inner h2 em {
-  font-style:italic;
-  color: var(--gold);
+  font-style: italic;
+  color: #c0485a;
+  position: relative;
 }
+/* Underline garis bawah judul em */
+.svc-cta-inner h2 em::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #c0485a, #e89090, transparent);
+  border-radius: 999px;
+  opacity: 0.6;
+}
+
+/* Paragraf */
 .svc-cta-inner p {
-  font-family:'Jost',sans-serif;
-  font-size:1rem;
-  color:rgba(255,255,255,0.65);
-  margin-bottom:2rem;
-  line-height:1.7;
+  font-family: 'Jost', sans-serif;
+  font-size: 1rem;
+  color: rgba(46,26,22,0.62);
+  line-height: 1.75;
+  max-width: 520px;
+  margin: 0 auto 2.2rem;
 }
+
+/* Baris tombol */
 .svc-cta-btns {
-  display:flex;
-  justify-content:center;
-  gap:1rem;
-  flex-wrap:wrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
+
+/* Tombol WA */
 .svc-cta-wa {
-  display:inline-flex;
-  align-items:center;
-  gap:0.6rem;
-  background:#25D366;
-  color:white;
-  font-family:'Jost',sans-serif;
-  font-weight:600;
-  font-size:1rem;
-  padding:0.9rem 2rem;
-  border-radius:999px;
-  text-decoration:none;
-  transition: transform .2s, box-shadow .2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  font-family: 'Jost', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.9rem 2rem;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow:
+    0 6px 20px rgba(22,163,74,0.30),
+    0 2px 6px rgba(22,163,74,0.20);
+  transition: transform .22s, box-shadow .22s;
+  white-space: nowrap;
 }
-.svc-cta-wa:hover { transform:translateY(-3px); box-shadow:0 10px 30px rgba(37,211,102,0.4); }
+.svc-cta-wa:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 12px 32px rgba(22,163,74,0.38),
+    0 4px 12px rgba(22,163,74,0.20);
+  color: white;
+}
+.svc-cta-wa svg { flex-shrink: 0; }
+
+/* Tombol Explore / Katalog */
 .svc-cta-explore {
-  display:inline-flex;
-  align-items:center;
-  gap:0.6rem;
-  background: rgba(255,255,255,0.08);
-  backdrop-filter:blur(8px);
-  border:1.5px solid rgba(255,255,255,0.2);
-  color:white;
-  font-family:'Jost',sans-serif;
-  font-weight:500;
-  font-size:0.95rem;
-  padding:0.9rem 1.8rem;
-  border-radius:999px;
-  text-decoration:none;
-  transition: background .2s, border-color .2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(12px);
+  color: #3a2420;
+  border: 1.5px solid rgba(192,72,90,0.28);
+  font-family: 'Jost', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.9rem 1.8rem;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(192,72,90,0.08);
+  transition: background .22s, border-color .22s, color .22s, transform .22s, box-shadow .22s;
+  white-space: nowrap;
 }
-.svc-cta-explore:hover { background:rgba(255,255,255,0.14); border-color:rgba(255,255,255,0.4); }
+.svc-cta-explore:hover {
+  background: rgba(255,255,255,0.95);
+  border-color: rgba(192,72,90,0.55);
+  color: #c0485a;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(192,72,90,0.14);
+}
+.svc-cta-explore svg { flex-shrink: 0; color: currentColor; }
+
+/* Trust mini row bawah tombol */
+.svc-cta-trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+.svc-cta-trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(46,26,22,0.50);
+}
+.svc-cta-trust-item svg { color: #c9a84c; flex-shrink: 0; }
+
+/* Dekorasi SVG bunga melayang */
+.svc-cta-flower {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  animation: svc-cta-floatin 1s ease forwards;
+}
+@keyframes svc-cta-floatin {
+  to { opacity: 1; }
+}
+@keyframes svc-cta-sway {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  33%      { transform: translateY(-8px) rotate(4deg); }
+  66%      { transform: translateY(5px) rotate(-3deg); }
+}
+@keyframes svc-cta-sway2 {
+  0%,100% { transform: translateY(0) rotate(0deg) scaleX(1); }
+  50%      { transform: translateY(-12px) rotate(-5deg) scaleX(1.05); }
+}
+
+/* Wave bawah */
+.svc-cta-final-wave-bot {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  line-height: 0;
+  z-index: 4;
+}
+.svc-cta-final-wave-bot svg { display: block; width: 100%; }
 
 /* Floating floral SVGs */
 @keyframes svc-float { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-10px) rotate(3deg)} }
@@ -1107,27 +1247,136 @@ require_once __DIR__ . '/../includes/header.php';
 
 <!-- ═══════════ FINAL CTA ═══════════ -->
 <section class="svc-cta-final">
-  <!-- Stars -->
-  <div class="svc-cta-stars" id="svcStars"></div>
 
+  <!-- Layer foto + overlay -->
+  <div class="svc-cta-final-bgimg"></div>
+  <div class="svc-cta-final-overlay"></div>
+
+  <!-- Orbs warm -->
+  <div class="svc-cta-orb" style="width:500px;height:500px;background:rgba(255,180,180,0.16);top:-160px;left:50%;transform:translateX(-50%);"></div>
+  <div class="svc-cta-orb" style="width:300px;height:300px;background:rgba(150,210,150,0.13);bottom:-80px;right:5%;"></div>
+  <div class="svc-cta-orb" style="width:240px;height:240px;background:rgba(255,200,160,0.14);bottom:-60px;left:4%;"></div>
+  <div class="svc-cta-orb" style="width:180px;height:180px;background:rgba(255,190,210,0.20);top:10%;left:8%;"></div>
+  <div class="svc-cta-orb" style="width:160px;height:160px;background:rgba(180,220,170,0.18);top:15%;right:7%;"></div>
+
+  <!-- Wave atas (transisi dari putih) -->
+  <div class="svc-cta-final-wave-top">
+    <svg viewBox="0 0 1440 50" preserveAspectRatio="none" height="50">
+      <path d="M0,0 C480,50 960,0 1440,40 L1440,0 L0,0 Z" fill="white" opacity="0.6"/>
+      <path d="M0,20 C360,55 1080,5 1440,35 L1440,0 L0,0 Z" fill="white" opacity="0.4"/>
+    </svg>
+  </div>
+
+  <!-- Dekorasi bunga kiri bawah -->
+  <svg class="svc-cta-flower" style="bottom:20px;left:3%;width:160px;animation-delay:.3s;animation: svc-cta-floatin .8s .3s ease forwards, svc-cta-sway 7s 1.1s ease-in-out infinite;" viewBox="0 0 160 200" fill="none">
+    <path d="M80 195 Q77 140 79 100 Q80 60 81 20" stroke="#8aaa6a" stroke-width="2.5" fill="none"/>
+    <path d="M79 120 Q50 108 40 88 Q58 98 79 102Z" fill="#9aba7a" opacity=".75"/>
+    <path d="M80 145 Q108 133 118 113 Q100 123 80 128Z" fill="#7aaa5e" opacity=".75"/>
+    <!-- Bunga besar -->
+    <ellipse cx="80" cy="20" rx="12" ry="20" fill="#fda4af"/>
+    <ellipse cx="80" cy="20" rx="12" ry="20" fill="#fba8b8" transform="rotate(45 80 20)"/>
+    <ellipse cx="80" cy="20" rx="12" ry="20" fill="#f9d0da" transform="rotate(90 80 20)"/>
+    <ellipse cx="80" cy="20" rx="12" ry="20" fill="#fecdd3" transform="rotate(135 80 20)"/>
+    <circle cx="80" cy="20" r="12" fill="#c9a84c"/>
+    <circle cx="80" cy="20" r="6" fill="#f5e9c8"/>
+  </svg>
+
+  <!-- Dekorasi bunga kanan atas -->
+  <svg class="svc-cta-flower" style="top:18px;right:4%;width:120px;animation-delay:.5s;animation: svc-cta-floatin .8s .5s ease forwards, svc-cta-sway2 9s 1.3s ease-in-out infinite;" viewBox="0 0 120 160" fill="none">
+    <path d="M60 155 Q58 110 59 75 Q60 45 61 15" stroke="#8aaa6a" stroke-width="2" fill="none"/>
+    <path d="M59 90 Q38 80 30 64 Q46 72 59 75Z" fill="#9aba7a" opacity=".70"/>
+    <ellipse cx="60" cy="15" rx="9" ry="16" fill="#fecdd3"/>
+    <ellipse cx="60" cy="15" rx="9" ry="16" fill="#fda4af" transform="rotate(60 60 15)"/>
+    <ellipse cx="60" cy="15" rx="9" ry="16" fill="#f9a8d4" transform="rotate(120 60 15)"/>
+    <circle cx="60" cy="15" r="9" fill="#c9a84c"/>
+    <circle cx="60" cy="15" r="5" fill="#f5e9c8"/>
+  </svg>
+
+  <!-- Kuntum kecil kiri atas -->
+  <svg class="svc-cta-flower" style="top:25px;left:12%;width:80px;opacity:0;animation: svc-cta-floatin .8s .7s ease forwards, svc-cta-sway 8s 1.5s ease-in-out infinite;" viewBox="0 0 80 110" fill="none">
+    <path d="M40 105 Q38 72 39 48 Q40 28 41 8" stroke="#8aaa6a" stroke-width="1.8" fill="none"/>
+    <ellipse cx="40" cy="8" rx="7" ry="13" fill="#fda4af"/>
+    <ellipse cx="40" cy="8" rx="7" ry="13" fill="#fecdd3" transform="rotate(72 40 8)"/>
+    <ellipse cx="40" cy="8" rx="7" ry="13" fill="#f9a8d4" transform="rotate(144 40 8)"/>
+    <circle cx="40" cy="8" r="7" fill="#c9a84c"/>
+  </svg>
+
+  <!-- Kuntum kecil kanan bawah -->
+  <svg class="svc-cta-flower" style="bottom:30px;right:12%;width:70px;opacity:0;animation: svc-cta-floatin .8s .6s ease forwards, svc-cta-sway2 6s 1.4s ease-in-out infinite;" viewBox="0 0 70 100" fill="none">
+    <path d="M35 95 Q33 65 34 40 Q35 22 36 5" stroke="#8aaa6a" stroke-width="1.8" fill="none"/>
+    <path d="M34 55 Q18 47 13 34 Q25 41 34 43Z" fill="#9aba7a" opacity=".65"/>
+    <ellipse cx="35" cy="5" rx="7" ry="13" fill="#fecdd3"/>
+    <ellipse cx="35" cy="5" rx="7" ry="13" fill="#fda4af" transform="rotate(60 35 5)"/>
+    <ellipse cx="35" cy="5" rx="7" ry="13" fill="#f9d0da" transform="rotate(120 35 5)"/>
+    <circle cx="35" cy="5" r="7" fill="#c9a84c"/>
+  </svg>
+
+  <!-- KONTEN UTAMA -->
   <div class="svc-cta-inner svc-reveal">
+
+    <!-- Eyebrow -->
     <div class="svc-eyebrow">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       Pesan Sekarang
     </div>
+
+    <!-- Ornamen floral SVG di atas judul -->
+    <svg width="80" height="28" viewBox="0 0 80 28" fill="none" style="margin:0 auto 0.8rem;display:block;opacity:.55">
+      <circle cx="40" cy="14" r="4" fill="#c9a84c"/>
+      <circle cx="20" cy="14" r="2.5" fill="#c0485a" opacity=".6"/>
+      <circle cx="60" cy="14" r="2.5" fill="#c0485a" opacity=".6"/>
+      <line x1="0" y1="14" x2="14" y2="14" stroke="#c9a84c" stroke-width="1.2" opacity=".4"/>
+      <line x1="66" y1="14" x2="80" y2="14" stroke="#c9a84c" stroke-width="1.2" opacity=".4"/>
+      <path d="M28 14 Q34 7 40 14 Q34 21 28 14Z" fill="#fda4af" opacity=".7"/>
+      <path d="M52 14 Q46 7 40 14 Q46 21 52 14Z" fill="#fda4af" opacity=".7"/>
+    </svg>
+
     <h2>Kirim Bunga <em>Kapan Saja</em></h2>
+
     <p>Tidak perlu menunggu toko buka. Kami siap melayani pesanan Anda 24 jam nonstop dengan pengiriman same day ke seluruh Indonesia.</p>
+
+    <!-- Tombol -->
     <div class="svc-cta-btns">
       <a href="<?= waLink() ?>" target="_blank" class="svc-cta-wa">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M5.339 15.626C4.094 13.636 3.5 11.272 3.5 9.005 3.5 4.58 7.08 1 11.5 1s8 3.58 8 8.005c0 4.424-3.58 8.004-8 8.004a7.925 7.925 0 0 1-3.945-1.043L2 17.5l1.339-1.874z"/></svg>
         Pesan via WhatsApp
       </a>
       <a href="<?= BASE_URL ?>/produk" class="svc-cta-explore">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
         Lihat Semua Produk
       </a>
     </div>
+
+    <!-- Trust mini row -->
+    <div class="svc-cta-trust">
+      <span class="svc-cta-trust-item">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        Buka 24 Jam
+      </span>
+      <span class="svc-cta-trust-item">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Same Day Delivery
+      </span>
+      <span class="svc-cta-trust-item">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Bunga 100% Segar
+      </span>
+      <span class="svc-cta-trust-item">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Florist Profesional
+      </span>
+    </div>
+
+  </div><!-- /.svc-cta-inner -->
+
+  <!-- Wave bawah (transisi ke footer) -->
+  <div class="svc-cta-final-wave-bot">
+    <svg viewBox="0 0 1440 50" preserveAspectRatio="none" height="50">
+      <path d="M0,20 C360,55 1080,0 1440,35 L1440,50 L0,50 Z" fill="rgba(245,238,230,0.5)"/>
+      <path d="M0,30 C480,55 960,10 1440,40 L1440,50 L0,50 Z" fill="rgba(245,238,230,0.3)"/>
+    </svg>
   </div>
+
 </section>
 
 <script>
