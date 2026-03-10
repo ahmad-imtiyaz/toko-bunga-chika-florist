@@ -304,7 +304,7 @@ require_once __DIR__ . '/../includes/header.php';
   font-family:'Cormorant Garamond',serif;
   font-size:.98rem; font-weight:700; color:#2a1018; line-height:1.3;
   flex:1;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;line-clamp: 2;-webkit-box-orient:vertical;overflow:hidden;
   transition:color .2s;
 }
 .k-card:hover .k-card-name { color:#c0485a; }

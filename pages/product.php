@@ -498,7 +498,7 @@ require_once __DIR__ . '/../includes/header.php';
 .rel-card-name {
   font-family:'Jost',sans-serif;font-size:.78rem;font-weight:600;color:#1f2937;
   line-height:1.35;flex:1;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;line-clamp: 2;-webkit-box-orient:vertical;overflow:hidden;
 }
 .rel-card-price {
   font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:700;color:#e11d48;
