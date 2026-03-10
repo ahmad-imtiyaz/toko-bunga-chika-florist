@@ -4,6 +4,7 @@ $footer_text = getSetting('footer_text','');
 $instagram   = getSetting('instagram','');
 $facebook    = getSetting('facebook','');
 $allCities   = getActiveCities();
+$logo        = getSetting('logo', 'logo.jpeg'); // tambah ini
 $mainCats    = getMainCategories();
 ?>
 <footer class="bg-gray-900 text-gray-300 mt-16">
@@ -29,9 +30,9 @@ $mainCats    = getMainCategories();
     <!-- Brand -->
     <div>
       <a href="<?= BASE_URL ?>/" class="inline-block mb-4">
-        <img src="<?= UPLOAD_URL . getSetting('logo','logo.jpeg') ?>" alt="<?= clean($site_name) ?>"
-             class="h-12 w-auto object-contain brightness-0 invert opacity-90"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <img src="<?= UPLOAD_URL . $logo ?>" alt="<?= clean($site_name) ?>"
+     class="h-12 w-auto object-contain opacity-90"
+     onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
         <span class="font-display text-xl font-bold text-white" style="display:none"><?= clean($site_name) ?></span>
       </a>
       <p class="text-sm text-gray-400 leading-relaxed mb-4"><?= clean($footer_text) ?></p>
