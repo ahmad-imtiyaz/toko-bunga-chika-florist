@@ -26,23 +26,96 @@ require_once __DIR__ . '/../includes/header.php';
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600;700&display=swap');
 
 /* ==============================
-   HERO — FULL BLEED GRAND
+   CSS VARIABLES — BRIGHT FLORAL
+   ============================== */
+:root {
+  --rose:      #c0485a;
+  --rose-soft: #e8a0a8;
+  --sage:      #6a9e70;
+  --sage-soft: #9aba88;
+  --cream:     #faf7f4;
+  --warm:      #3a2420;
+  --gold:      #c9a84c;
+  --blush:     #fce8ec;
+}
+
+/* ==============================
+   HERO — BRIGHT FLORAL
    ============================== */
 .city-hero {
   position: relative;
-  min-height: 520px;
+  min-height: 560px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   overflow: hidden;
-  background: linear-gradient(160deg, #1a0810 0%, #2d1020 40%, #1e1a0e 100%);
+  background: var(--cream);
 }
 
-/* Atmospheric glow layers */
+/* Background image — pwutih.jpeg */
+.city-hero-bgimg {
+  position: absolute;
+  inset: 0;
+  background-image: url('<?= BASE_URL ?>/assets/images/pwutih.jpeg');
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
+  z-index: 0;
+  opacity: 0.18;
+}
+
+/* Gradient overlay — light, airy */
+.city-hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 0%,   rgba(255,252,248,0.72) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 15% 50%,  rgba(255,230,235,0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 40%,  rgba(210,235,205,0.28) 0%, transparent 60%),
+    linear-gradient(180deg,
+      rgba(253,248,242,0.80) 0%,
+      rgba(252,246,240,0.65) 40%,
+      rgba(250,243,236,0.88) 75%,
+      rgba(248,241,234,0.98) 100%
+    );
+}
+
+/* Floral corner accents */
+.city-hero-corner {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+  background-image: url('<?= BASE_URL ?>/assets/images/pwutih.jpeg');
+  background-size: cover;
+  border-radius: 50%;
+  filter: saturate(0.7) brightness(1.05);
+}
+.city-hero-corner-tl {
+  width: 380px; height: 380px;
+  top: -120px; left: -100px;
+  background-position: center;
+  opacity: 0.20;
+}
+.city-hero-corner-tr {
+  width: 280px; height: 280px;
+  top: -70px; right: -70px;
+  background-position: center;
+  opacity: 0.14;
+}
+.city-hero-corner-br {
+  width: 240px; height: 240px;
+  bottom: 60px; right: -40px;
+  background-position: bottom center;
+  opacity: 0.12;
+}
+
+/* Atmospheric soft glow orbs */
 .city-hero-atm {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 2;
 }
 .city-glow {
   position: absolute;
@@ -50,36 +123,29 @@ require_once __DIR__ . '/../includes/header.php';
   filter: blur(90px);
 }
 
-/* Stars */
-.city-stars {
+/* Floating petals */
+.city-petals {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 3;
   overflow: hidden;
 }
-.city-star {
+.city-petal {
   position: absolute;
-  border-radius: 50%;
-  background: #fff;
-  animation: starTwinkle var(--dur, 3s) var(--delay, 0s) ease-in-out infinite;
+  border-radius: 50% 0 50% 0;
+  animation: cityPetalFall linear infinite;
+  opacity: 0;
 }
-@keyframes starTwinkle {
-  0%,100% { opacity: var(--op, .4); transform: scale(1); }
-  50%      { opacity: .05; transform: scale(.6); }
+@keyframes cityPetalFall {
+  0%   { opacity:0; transform: translateY(-20px) rotate(0deg) translateX(0); }
+  8%   { opacity: 0.55; }
+  92%  { opacity: 0.25; }
+  100% { opacity:0; transform: translateY(110vh) rotate(420deg) translateX(30px); }
 }
 
-/* City silhouette SVG */
+/* City silhouette SVG — now lighter */
 .city-silhouette {
-  position: absolute;
-  bottom: 0;
-  left: 0; right: 0;
-  z-index: 3;
-  pointer-events: none;
-  line-height: 0;
-}
-
-/* Garden overlay — bunga di atas siluet */
-.city-garden {
   position: absolute;
   bottom: 0;
   left: 0; right: 0;
@@ -88,13 +154,23 @@ require_once __DIR__ . '/../includes/header.php';
   line-height: 0;
 }
 
-/* Konten hero */
+/* Garden overlay */
+.city-garden {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  z-index: 5;
+  pointer-events: none;
+  line-height: 0;
+}
+
+/* ── Hero Content ── */
 .city-hero-content {
   position: relative;
   z-index: 10;
   max-width: 720px;
   margin: 0 auto;
-  padding: 3rem 1.5rem 5rem;
+  padding: 3.5rem 1.5rem 5.5rem;
   text-align: center;
   animation: cityFadeUp .9s cubic-bezier(.22,.68,0,1.2) both;
 }
@@ -119,13 +195,13 @@ require_once __DIR__ . '/../includes/header.php';
   font-weight: 600;
   letter-spacing: .09em;
   text-transform: uppercase;
-  color: rgba(255,255,255,.45);
+  color: rgba(58,36,32,.40);
   text-decoration: none;
   transition: color .2s;
 }
-.city-breadcrumb a:hover { color: rgba(255,255,255,.85); }
-.city-breadcrumb .sep    { color: rgba(255,255,255,.2); }
-.city-breadcrumb .cur    { color: #f9c784; }
+.city-breadcrumb a:hover { color: var(--rose); }
+.city-breadcrumb .sep    { color: rgba(58,36,32,.2); }
+.city-breadcrumb .cur    { color: var(--rose); }
 
 /* Province badge */
 .city-prov-badge {
@@ -137,12 +213,14 @@ require_once __DIR__ . '/../includes/header.php';
   font-weight: 700;
   letter-spacing: .1em;
   text-transform: uppercase;
-  color: #f9c784;
-  background: rgba(201,168,76,.15);
-  border: 1px solid rgba(201,168,76,.3);
+  color: #7a4f3a;
+  background: rgba(255,255,255,.65);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(192,72,90,.25);
   padding: .28rem .85rem;
   border-radius: 999px;
   margin-bottom: 1rem;
+  box-shadow: 0 2px 12px rgba(192,72,90,.08);
   animation: cityFadeUp .7s .15s both;
 }
 
@@ -150,44 +228,55 @@ require_once __DIR__ . '/../includes/header.php';
 .city-tier {
   display: inline-block;
   font-family: 'Jost', sans-serif;
-  font-size: .65rem;
+  font-size: .63rem;
   font-weight: 700;
-  letter-spacing: .08em;
+  letter-spacing: .07em;
   text-transform: uppercase;
   color: #fff;
-  background: rgba(225,29,72,.55);
-  border: 1px solid rgba(225,29,72,.4);
-  padding: .18rem .65rem;
+  background: rgba(192,72,90,.75);
+  padding: .15rem .6rem;
   border-radius: 999px;
-  margin-left: .4rem;
+  margin-left: .35rem;
   vertical-align: middle;
 }
 
+/* H1 */
 .city-hero h1 {
   font-family: 'Cormorant Garamond', serif;
   font-size: clamp(2rem, 6vw, 3.8rem);
   font-weight: 700;
-  color: #fff;
+  color: var(--warm);
   line-height: 1.1;
   margin-bottom: .8rem;
-  text-shadow: 0 2px 30px rgba(0,0,0,.5);
   animation: cityFadeUp .7s .2s both;
 }
-.city-hero h1 em { font-style: italic; color: #fda4af; }
+.city-hero h1 em {
+  font-style: italic;
+  background: linear-gradient(135deg, #c0485a, #e8778a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-/* Gold divider */
+/* Rose divider */
 .city-divider {
   width: 70px; height: 2px;
-  background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+  background: linear-gradient(90deg, transparent, var(--rose), transparent);
   margin: .8rem auto 1rem;
   animation: cityFadeUp .7s .25s both;
+}
+
+/* SVG floral ornament */
+.city-hero-ornament {
+  margin: 0 auto .8rem;
+  animation: cityFadeUp .7s .18s both;
 }
 
 .city-hero-desc {
   font-family: 'Jost', sans-serif;
   font-size: .92rem;
-  color: rgba(255,255,255,.7);
-  line-height: 1.7;
+  color: rgba(58,36,32,.60);
+  line-height: 1.75;
   max-width: 520px;
   margin: 0 auto 1.5rem;
   animation: cityFadeUp .7s .3s both;
@@ -199,45 +288,43 @@ require_once __DIR__ . '/../includes/header.php';
   align-items: center;
   justify-content: center;
   gap: 0;
-  margin-bottom: 1.6rem;
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.70);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(192,72,90,.15);
   border-radius: 1rem;
   overflow: hidden;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 24px rgba(192,72,90,.08), 0 1px 4px rgba(0,0,0,.04);
   animation: cityFadeUp .7s .35s both;
   max-width: 420px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 1.6rem;
+  margin: 0 auto 1.6rem;
 }
 .city-stat {
   flex: 1;
-  padding: .75rem .5rem;
+  padding: .85rem .5rem;
   text-align: center;
-  border-right: 1px solid rgba(255,255,255,.1);
+  border-right: 1px solid rgba(192,72,90,.10);
 }
 .city-stat:last-child { border-right: none; }
 .city-stat-num {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.6rem;
   font-weight: 700;
-  color: #f9c784;
+  color: var(--rose);
   line-height: 1;
   display: block;
 }
 .city-stat-label {
   font-family: 'Jost', sans-serif;
-  font-size: .62rem;
+  font-size: .60rem;
   font-weight: 600;
   letter-spacing: .07em;
   text-transform: uppercase;
-  color: rgba(255,255,255,.45);
+  color: rgba(58,36,32,.40);
   margin-top: .2rem;
   display: block;
 }
 
-/* CTA */
+/* CTA Buttons */
 .city-hero-btns {
   display: flex;
   gap: .75rem;
@@ -245,7 +332,7 @@ require_once __DIR__ . '/../includes/header.php';
   flex-wrap: wrap;
   animation: cityFadeUp .7s .4s both;
 }
-.btn-wa-dark {
+.btn-wa-light {
   display: inline-flex;
   align-items: center;
   gap: .5rem;
@@ -253,36 +340,46 @@ require_once __DIR__ . '/../includes/header.php';
   font-size: .85rem;
   font-weight: 700;
   color: #fff;
-  background: #16a34a;
-  padding: .8rem 1.6rem;
+  background: linear-gradient(135deg, #25d366, #128c50);
+  padding: .85rem 1.8rem;
   border-radius: 999px;
   text-decoration: none;
-  box-shadow: 0 4px 20px rgba(22,163,74,.35);
+  box-shadow: 0 6px 22px rgba(18,140,80,.30);
   transition: all .25s;
 }
-.btn-wa-dark:hover { background: #15803d; transform: translateY(-2px); }
-.btn-scroll-dark {
+.btn-wa-light:hover {
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(18,140,80,.40);
+}
+.btn-scroll-light {
   display: inline-flex;
   align-items: center;
   gap: .4rem;
   font-family: 'Jost', sans-serif;
   font-size: .82rem;
   font-weight: 600;
-  color: rgba(255,255,255,.8);
-  background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.2);
-  backdrop-filter: blur(8px);
-  padding: .8rem 1.4rem;
+  color: rgba(58,36,32,.75);
+  background: rgba(255,255,255,.65);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(192,72,90,.25);
+  padding: .85rem 1.5rem;
   border-radius: 999px;
   text-decoration: none;
   transition: all .2s;
   cursor: pointer;
+  box-shadow: 0 2px 10px rgba(192,72,90,.06);
 }
-.btn-scroll-dark:hover { background: rgba(255,255,255,.18); color: #fff; }
-.btn-scroll-dark svg { animation: bounceD 1.6s ease-in-out infinite; }
+.btn-scroll-light:hover {
+  background: rgba(255,255,255,.90);
+  border-color: rgba(192,72,90,.45);
+  color: var(--rose);
+  transform: translateY(-2px);
+}
+.btn-scroll-light svg { animation: bounceD 1.6s ease-in-out infinite; }
 @keyframes bounceD { 0%,100%{transform:translateY(0)} 50%{transform:translateY(4px)} }
 
-/* Wave to body */
+/* Wave bawah hero */
 .city-hero-wave {
   position: absolute;
   bottom: -1px; left: 0; right: 0;
@@ -291,7 +388,7 @@ require_once __DIR__ . '/../includes/header.php';
 }
 
 /* ==============================
-   BODY
+   BODY (unchanged layout, refreshed colors)
    ============================== */
 .city-body {
   background: linear-gradient(170deg, #fdf6ee 0%, #fff 55%, #fdf0f3 100%);
@@ -301,7 +398,7 @@ require_once __DIR__ . '/../includes/header.php';
   font-family: 'Jost', sans-serif;
   font-size: .7rem; font-weight: 700;
   letter-spacing: .12em; text-transform: uppercase;
-  color: #e11d48; margin-bottom: .35rem;
+  color: var(--rose); margin-bottom: .35rem;
 }
 .sec-title {
   font-family: 'Cormorant Garamond', serif;
@@ -314,9 +411,7 @@ require_once __DIR__ . '/../includes/header.php';
   margin: .5rem 0 0;
 }
 
-/* ==============================
-   MASONRY AREAS
-   ============================== */
+/* ── Area Cards ── */
 .masonry-areas {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -325,18 +420,21 @@ require_once __DIR__ . '/../includes/header.php';
 @media(min-width: 640px) { .masonry-areas { grid-template-columns: repeat(3, 1fr); gap: 1rem; } }
 @media(min-width: 1024px) { .masonry-areas { grid-template-columns: repeat(4, 1fr); gap: 1.1rem; } }
 
-.area-mcard { display: block; } /* hapus break-inside */
-.area-mcard .area-mcard-img { height: 110px; } /* semua sama */
+.area-mcard {
+  display: block;
+  background: #fff;
+  border: 1px solid #fde8b4;
+  border-radius: .875rem;
+  overflow: hidden;
+  text-decoration: none;
+  transition: all .25s;
+}
 .area-mcard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 28px rgba(214,90,110,.13);
+  box-shadow: 0 10px 28px rgba(192,72,90,.13);
   border-color: #fca5a5;
 }
-
-/* Featured (tall) card — 1st, 4th, 7th */
-.area-mcard.tall .area-mcard-img { height: 140px; }
-.area-mcard.short .area-mcard-img { height: 80px; }
-.area-mcard .area-mcard-img {
+.area-mcard-img {
   height: 110px;
   background: linear-gradient(135deg, #fdf0f3, #fdf6ee);
   overflow: hidden;
@@ -349,13 +447,8 @@ require_once __DIR__ . '/../includes/header.php';
   align-items: center;
   justify-content: center;
 }
-/* Decorative flower in card bg */
-.area-mcard-flower {
-  opacity: .15;
-}
-.area-mcard-body {
-  padding: .75rem .85rem .8rem;
-}
+.area-mcard-flower { opacity: .15; }
+.area-mcard-body { padding: .75rem .85rem .8rem; }
 .area-mcard-name {
   font-family: 'Jost', sans-serif;
   font-size: .82rem;
@@ -365,26 +458,17 @@ require_once __DIR__ . '/../includes/header.php';
   transition: color .2s;
   display: flex; align-items: center; gap: .4rem;
 }
-.area-mcard:hover .area-mcard-name { color: #e11d48; }
+.area-mcard:hover .area-mcard-name { color: var(--rose); }
 .area-mcard-pin {
-  width: 14px; height: 14px;
-  color: #e11d48;
-  flex-shrink: 0;
-  opacity: 0;
+  width: 14px; height: 14px; color: var(--rose);
+  flex-shrink: 0; opacity: 0;
   transition: opacity .2s, transform .2s;
   transform: translateX(-4px);
 }
 .area-mcard:hover .area-mcard-pin { opacity: 1; transform: translateX(0); }
-.area-mcard-sub {
-  font-family: 'Jost', sans-serif;
-  font-size: .7rem;
-  color: #9ca3af;
-  font-weight: 500;
-}
+.area-mcard-sub { font-family: 'Jost', sans-serif; font-size: .7rem; color: #9ca3af; font-weight: 500; }
 
-/* ==============================
-   LANDMARK CHIPS
-   ============================== */
+/* Landmark chips */
 .lm-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
 .lm-chip {
   display: inline-flex; align-items: center; gap: .4rem;
@@ -394,12 +478,10 @@ require_once __DIR__ . '/../includes/header.php';
   padding: .35rem .85rem; border-radius: 999px;
   transition: all .2s;
 }
-.lm-chip:hover { color: #e11d48; border-color: #fca5a5; background: #fff5f5; }
+.lm-chip:hover { color: var(--rose); border-color: #fca5a5; background: #fff5f5; }
 .lm-dot { width:6px; height:6px; border-radius:50%; background:#c9a84c; flex-shrink:0; }
 
-/* ==============================
-   KATEGORI LIST
-   ============================== */
+/* Category list */
 .prodcat-list { display: flex; flex-direction: column; gap: .5rem; }
 .prodcat-item {
   display: flex; align-items: center; gap: .75rem;
@@ -410,13 +492,11 @@ require_once __DIR__ . '/../includes/header.php';
 .prodcat-item:hover { border-color: #fca5a5; background: #fff5f5; transform: translateX(4px); }
 .prodcat-dot { width:8px; height:8px; border-radius:50%; background:#c9a84c; flex-shrink:0; }
 .prodcat-name { font-family:'Jost',sans-serif; font-size:.8rem; font-weight:600; color:#374151; flex:1; transition:color .2s; }
-.prodcat-item:hover .prodcat-name { color:#e11d48; }
+.prodcat-item:hover .prodcat-name { color: var(--rose); }
 .prodcat-arr { color:#d1d5db; transition:color .2s,transform .2s; }
-.prodcat-item:hover .prodcat-arr { color:#e11d48; transform:translateX(3px); }
+.prodcat-item:hover .prodcat-arr { color: var(--rose); transform:translateX(3px); }
 
-/* ==============================
-   PRODUK MINI CARDS
-   ============================== */
+/* Mini product grid */
 .mini-prod-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; }
 @media(min-width:640px){ .mini-prod-grid{ grid-template-columns:repeat(4,1fr); } }
 .mini-prod-card {
@@ -424,17 +504,15 @@ require_once __DIR__ . '/../includes/header.php';
   border-radius:.875rem; overflow:hidden;
   text-decoration:none; transition:all .25s; display:block;
 }
-.mini-prod-card:hover { transform:translateY(-3px); box-shadow:0 6px 18px rgba(214,90,110,.1); border-color:#fca5a5; }
+.mini-prod-card:hover { transform:translateY(-3px); box-shadow:0 6px 18px rgba(192,72,90,.10); border-color:#fca5a5; }
 .mini-prod-img { height:100px; overflow:hidden; background:linear-gradient(135deg,#fdf0f3,#fdf6ee); }
 .mini-prod-img img { width:100%;height:100%;object-fit:cover;transition:transform .35s; }
 .mini-prod-card:hover .mini-prod-img img { transform:scale(1.07); }
 .mini-prod-body { padding:.55rem .65rem; }
-.mini-prod-name { font-family:'Jost',sans-serif;font-size:.72rem;font-weight:600;color:#374151;line-height:1.35;margin-bottom:.2rem;display:-webkit-box;-webkit-line-clamp:2;line-clamp: 2;-webkit-box-orient:vertical;overflow:hidden; }
-.mini-prod-price { font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:700;color:#e11d48; }
+.mini-prod-name { font-family:'Jost',sans-serif;font-size:.72rem;font-weight:600;color:#374151;line-height:1.35;margin-bottom:.2rem;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+.mini-prod-price { font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:700;color:var(--rose); }
 
-/* ==============================
-   NEARBY CITIES
-   ============================== */
+/* Nearby cities */
 .nearby-city-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; }
 @media(min-width:480px){ .nearby-city-grid{ grid-template-columns:repeat(3,1fr); } }
 @media(min-width:768px){ .nearby-city-grid{ grid-template-columns:repeat(4,1fr); } }
@@ -444,62 +522,98 @@ require_once __DIR__ . '/../includes/header.php';
   border-radius:.875rem; padding:.8rem .9rem;
   text-decoration:none; transition:all .25s;
 }
-.nearby-city-card:hover { transform:translateY(-3px); box-shadow:0 6px 18px rgba(214,90,110,.1); border-color:#fca5a5; background:#fff5f5; }
+.nearby-city-card:hover { transform:translateY(-3px); box-shadow:0 6px 18px rgba(192,72,90,.10); border-color:#fca5a5; background:#fff5f5; }
 .nearby-city-icon {
   width:32px;height:32px;border-radius:50%;
   background:linear-gradient(135deg,#fdf0f3,#fdf6ee);
   border:1px solid #fde8b4;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  transition:all .25s;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .25s;
 }
 .nearby-city-card:hover .nearby-city-icon { background:linear-gradient(135deg,#ffe4e6,#fdf0f3);border-color:#fca5a5; }
-.nearby-city-icon svg { color:#e11d48; }
+.nearby-city-icon svg { color:var(--rose); }
 .nearby-city-name { font-family:'Jost',sans-serif;font-size:.78rem;font-weight:600;color:#374151;line-height:1.35;transition:color .2s; }
-.nearby-city-card:hover .nearby-city-name { color:#e11d48; }
+.nearby-city-card:hover .nearby-city-name { color:var(--rose); }
 
-/* ==============================
-   SEO & STRIPS
-   ============================== */
+/* SEO strip */
 .seo-prose { font-family:'Jost',sans-serif;font-size:.85rem;color:#6b7280;line-height:1.8; }
-.seo-prose a { color:#e11d48;text-decoration:underline; }
+.seo-prose a { color:var(--rose);text-decoration:underline; }
 .city-strip { background:linear-gradient(135deg,#fdf6ee,#fdf0f3);border:1px solid #fde8b4;border-radius:1rem;padding:1.1rem; }
 .city-strip-label { font-family:'Jost',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem; }
 .city-strip-label::after { content:'';flex:1;height:1px;background:linear-gradient(90deg,#fde8b4,transparent); }
 .internal-links { display:flex;flex-wrap:wrap;gap:.4rem; }
 .internal-links a { font-family:'Jost',sans-serif;font-size:.72rem;font-weight:500;color:#6b7280;background:#fff;border:1px solid #fde8b4;border-radius:999px;padding:.25rem .7rem;text-decoration:none;transition:all .2s; }
-.internal-links a:hover { color:#e11d48;border-color:#fca5a5;background:#fff5f5; }
+.internal-links a:hover { color:var(--rose);border-color:#fca5a5;background:#fff5f5; }
 
-/* CTA */
-.city-cta { background:linear-gradient(135deg,#881337 0%,#9f1239 50%,#7f1d1d 100%);position:relative;overflow:hidden; }
-.city-cta-pat { position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 0,transparent 50%),repeating-linear-gradient(-45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 0,transparent 50%);background-size:28px 28px; }
+/* CTA bottom — BRIGHT floral version */
+.city-cta {
+  position: relative;
+  overflow: hidden;
+  background: #faf7f4;
+}
+.city-cta-bgimg {
+  position: absolute;
+  inset: 0;
+  background-image: url('<?= BASE_URL ?>/assets/images/pwutih.jpeg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.14;
+  z-index: 0;
+}
+.city-cta-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(160deg,
+    rgba(253,248,242,0.88) 0%,
+    rgba(252,243,246,0.82) 50%,
+    rgba(253,248,242,0.92) 100%
+  );
+}
+.city-cta-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 2;
+}
 </style>
 
 <!-- ==============================
-     HERO — FULL BLEED GRAND
+     HERO — BRIGHT FLORAL
      ============================== -->
 <section class="city-hero">
 
-  <!-- Atmospheric glow -->
+  <!-- Background image -->
+  <div class="city-hero-bgimg"></div>
+  <!-- Gradient overlay -->
+  <div class="city-hero-overlay"></div>
+
+  <!-- Floral corner accents -->
+  <div class="city-hero-corner city-hero-corner-tl"></div>
+  <div class="city-hero-corner city-hero-corner-tr"></div>
+  <div class="city-hero-corner city-hero-corner-br"></div>
+
+  <!-- Soft warm glow orbs -->
   <div class="city-hero-atm">
-    <div class="city-glow" style="width:500px;height:500px;background:rgba(190,24,93,0.22);top:-150px;left:-100px;"></div>
-    <div class="city-glow" style="width:400px;height:400px;background:rgba(201,168,76,0.14);top:-80px;right:-60px;"></div>
-    <div class="city-glow" style="width:350px;height:350px;background:rgba(30,90,50,0.12);bottom:80px;left:30%;"></div>
-    <div class="city-glow" style="width:260px;height:260px;background:rgba(253,164,175,0.18);bottom:60px;right:10%;"></div>
+    <div class="city-glow" style="width:480px;height:480px;background:rgba(240,160,170,0.16);top:-130px;left:-80px;z-index:2;"></div>
+    <div class="city-glow" style="width:380px;height:380px;background:rgba(160,200,150,0.12);top:-60px;right:-50px;z-index:2;"></div>
+    <div class="city-glow" style="width:320px;height:320px;background:rgba(255,220,200,0.14);bottom:100px;left:30%;z-index:2;"></div>
+    <div class="city-glow" style="width:240px;height:240px;background:rgba(250,220,230,0.18);bottom:80px;right:8%;z-index:2;"></div>
   </div>
 
-  <!-- Stars -->
-  <div class="city-stars" id="city-stars"></div>
+  <!-- Falling petals -->
+  <div class="city-petals" id="city-petals"></div>
 
-  <!-- City silhouette SVG — skyline abstrak -->
+  <!-- City silhouette — LIGHT version -->
   <div class="city-silhouette">
     <svg viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice" style="width:100%;height:200px;display:block;">
       <defs>
-        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#3d0f18" stop-opacity="0.9"/>
-          <stop offset="100%" stop-color="#1a0810" stop-opacity="1"/>
+        <linearGradient id="skyGradLight" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e8ddd6" stop-opacity="0.45"/>
+          <stop offset="100%" stop-color="#ddd0c8" stop-opacity="0.80"/>
         </linearGradient>
       </defs>
-      <!-- Bangunan kota — skyline abstrak dari kiri ke kanan -->
+      <!-- Skyline buildings — soft warm silhouette -->
       <path d="
         M0,200 L0,140 L30,140 L30,100 L50,100 L50,80 L70,80 L70,100 L90,100 L90,120 L120,120 L120,70 L130,70 L130,50 L140,50 L140,70 L150,70 L150,120
         L180,120 L180,90 L200,90 L200,60 L210,60 L210,40 L220,40 L220,60 L230,60 L230,90 L260,90
@@ -517,66 +631,108 @@ require_once __DIR__ . '/../includes/header.php';
         L1280,108 L1280,90 L1300,90 L1300,68 L1310,68 L1310,90 L1330,90
         L1330,115 L1360,115 L1360,88 L1375,88 L1375,68 L1385,65 L1395,68 L1395,88 L1410,88 L1410,115
         L1440,115 L1440,200 Z
-      " fill="url(#skyGrad)"/>
-      <!-- Window lights -->
+      " fill="url(#skyGradLight)"/>
+      <!-- Window lights — warm peachy glow -->
       <?php
       $wins = [[140,56,4,4],[220,46,4,4],[300,62,3,3],[400,50,4,4],[500,55,3,3],[580,62,3,3],[660,44,4,4],[770,58,3,3],[860,48,4,4],[965,60,3,3],[1122,50,3,3],[1225,64,3,3],[1385,70,4,4]];
       foreach($wins as $w): ?>
-      <rect x="<?=$w[0]-$w[2]/2?>" y="<?=$w[1]?>" width="<?=$w[2]?>" height="<?=$w[3]?>" fill="#f9c784" opacity="0.7" rx="1"/>
+      <rect x="<?=$w[0]-$w[2]/2?>" y="<?=$w[1]?>" width="<?=$w[2]?>" height="<?=$w[3]?>" fill="#e8a070" opacity="0.50" rx="1"/>
       <?php endforeach; ?>
     </svg>
   </div>
 
-  <!-- Garden layer — bunga siluet di atas skyline -->
+  <!-- Garden layer — bright flowers -->
   <div class="city-garden">
     <svg viewBox="0 0 1440 120" preserveAspectRatio="xMidYMax slice" style="width:100%;height:120px;display:block;">
       <defs>
-        <linearGradient id="gardenFloor" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#1a0810" stop-opacity="0"/>
-          <stop offset="100%" stop-color="#fdf6ee" stop-opacity="1"/>
+        <linearGradient id="gardenFloorLight" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#faf7f4" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#faf7f4" stop-opacity="1"/>
         </linearGradient>
       </defs>
-      <!-- Rumput & tanah -->
-      <path d="M0,90 C200,75 400,95 600,82 C800,68 1000,88 1200,78 C1320,72 1400,82 1440,80 L1440,120 L0,120 Z" fill="#1c1008" opacity="0.7"/>
-      <!-- Batang bunga -->
+      <!-- Grass & ground -->
+      <path d="M0,90 C200,75 400,95 600,82 C800,68 1000,88 1200,78 C1320,72 1400,82 1440,80 L1440,120 L0,120 Z"
+            fill="#e8e0d8" opacity="0.55"/>
+      <!-- Stems — sage green -->
       <?php
       $stems = [60,140,240,340,480,580,680,800,920,1040,1160,1280,1380];
       foreach($stems as $i=>$x):
         $h = 40 + ($i%3)*20;
-        $c = ($i%2==0)?"#e11d48":"#c9a84c";
+        // Alternating blush/sage/cream flower colors
+        $colors = ['#e8a0a8','#d4b88c','#b8d4a8','#e8a0a8','#d4c09c'];
+        $fc = $colors[$i % count($colors)];
       ?>
-      <line x1="<?=$x?>" y1="<?=115-$h?>" x2="<?=$x?>" y2="115" stroke="#4a7c59" stroke-width="2" opacity="0.6"/>
-      <!-- Kelopak -->
+      <line x1="<?=$x?>" y1="<?=115-$h?>" x2="<?=$x?>" y2="115"
+            stroke="#8aaa78" stroke-width="2" opacity="0.70"/>
+      <!-- Petals — soft bright -->
       <?php foreach([0,72,144,216,288] as $r): ?>
       <ellipse cx="<?=$x?>" cy="<?=110-$h?>" rx="5" ry="10"
-        fill="<?=$c?>" opacity="0.55"
+        fill="<?=$fc?>" opacity="0.65"
         transform="rotate(<?=$r?> <?=$x?> <?=110-$h?>)"/>
       <?php endforeach; ?>
-      <circle cx="<?=$x?>" cy="<?=110-$h?>" r="4" fill="#f9c784" opacity="0.7"/>
-      <!-- Daun -->
-      <ellipse cx="<?=$x-10?>" cy="<?=112-$h/2?>" rx="8" ry="4" fill="#4a7c59" opacity="0.45" transform="rotate(-35 <?=$x-10?> <?=112-$h/2?>)"/>
+      <!-- Flower center -->
+      <circle cx="<?=$x?>" cy="<?=110-$h?>" r="4" fill="#f5e0c0" opacity="0.85"/>
+      <!-- Leaves -->
+      <ellipse cx="<?=$x-10?>" cy="<?=112-$h/2?>" rx="8" ry="4"
+               fill="#8aaa78" opacity="0.55"
+               transform="rotate(-35 <?=$x-10?> <?=112-$h/2?>)"/>
       <?php endforeach; ?>
-      <!-- Floor gradient overlay -->
-      <rect x="0" y="90" width="1440" height="30" fill="url(#gardenFloor)"/>
+      <!-- Baby's breath clusters -->
+      <?php foreach([100,280,460,640,820,1000,1200] as $bx): ?>
+      <circle cx="<?=$bx?>"    cy="<?=80+($bx*3)%20?>" r="2.5" fill="#e8e8e0" opacity=".75"/>
+      <circle cx="<?=$bx+8?>"  cy="<?=75+($bx*2)%18?>" r="2"   fill="#f0f0e8" opacity=".70"/>
+      <circle cx="<?=$bx+14?>" cy="<?=82+($bx*4)%15?>" r="2"   fill="#e8e8e0" opacity=".65"/>
+      <?php endforeach; ?>
+      <!-- Floor gradient -->
+      <rect x="0" y="88" width="1440" height="32" fill="url(#gardenFloorLight)"/>
     </svg>
   </div>
 
-  <!-- Konten -->
+  <!-- Content -->
   <div class="city-hero-content">
 
     <nav class="city-breadcrumb">
       <a href="<?= BASE_URL ?>/">Beranda</a>
       <span class="sep">❯</span>
-      <?php if ($provinsi): ?><span style="color:rgba(255,255,255,.35)"><?= $provinsi ?></span><span class="sep">❯</span><?php endif; ?>
+      <?php if ($provinsi): ?>
+        <span style="color:rgba(58,36,32,.35)"><?= $provinsi ?></span>
+        <span class="sep">❯</span>
+      <?php endif; ?>
       <span class="cur">Toko Bunga <?= $kota ?></span>
     </nav>
 
     <?php if ($provinsi): ?>
     <div class="city-prov-badge">
-      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+        <circle cx="12" cy="11" r="3"/>
+      </svg>
       <?= $provinsi ?> <span class="city-tier"><?= $tierLabel ?></span>
     </div>
     <?php endif; ?>
+
+    <!-- Floral SVG ornament -->
+    <div class="city-hero-ornament">
+      <svg width="160" height="32" viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 20 Q40 8 80 18" stroke="#b08880" stroke-width="1" fill="none"/>
+        <circle cx="30" cy="13" r="4" fill="#e8a0a0" opacity=".55"/>
+        <circle cx="50" cy="10" r="3" fill="#c8d8b0" opacity=".65"/>
+        <circle cx="65" cy="14" r="3.5" fill="#e8a0a0" opacity=".50"/>
+        <path d="M28 13 Q24 8 20 11" stroke="#7a9a70" stroke-width="1" fill="none"/>
+        <path d="M50 10 Q46 5 43 7" stroke="#7a9a70" stroke-width="1" fill="none"/>
+        <!-- Center rose -->
+        <circle cx="100" cy="18" r="7" fill="#e8a0a8" opacity=".65"/>
+        <circle cx="100" cy="18" r="4.5" fill="#d47880" opacity=".75"/>
+        <circle cx="100" cy="18" r="2" fill="#b05060" opacity=".85"/>
+        <!-- Right branch mirror -->
+        <path d="M190 20 Q160 8 120 18" stroke="#b08880" stroke-width="1" fill="none"/>
+        <circle cx="170" cy="13" r="4" fill="#e8a0a0" opacity=".55"/>
+        <circle cx="150" cy="10" r="3" fill="#c8d8b0" opacity=".65"/>
+        <circle cx="135" cy="14" r="3.5" fill="#e8a0a0" opacity=".50"/>
+        <path d="M172 13 Q176 8 180 11" stroke="#7a9a70" stroke-width="1" fill="none"/>
+        <path d="M150 10 Q154 5 157 7" stroke="#7a9a70" stroke-width="1" fill="none"/>
+      </svg>
+    </div>
 
     <h1>Toko Bunga<br><em><?= $kota ?></em></h1>
 
@@ -608,19 +764,26 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 
     <div class="city-hero-btns">
-      <a href="<?= waLink("Halo Chika Florist, saya ingin pesan bunga di {$kota}") ?>" target="_blank" class="btn-wa-dark">
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.096.541 4.063 1.491 5.776L.057 23.04l5.43-1.424A11.947 11.947 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.015-1.371l-.36-.214-3.726.977.995-3.633-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
+      <a href="<?= waLink("Halo Chika Florist, saya ingin pesan bunga di {$kota}") ?>"
+         target="_blank" class="btn-wa-light">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.096.541 4.063 1.491 5.776L.057 23.04l5.43-1.424A11.947 11.947 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.015-1.371l-.36-.214-3.726.977.995-3.633-.235-.374A9.818 9.818 0 1112 21.818z"/>
+        </svg>
         Pesan Bunga di <?= $kota ?>
       </a>
-      <a href="#areas" class="btn-scroll-dark" onclick="document.getElementById('areas').scrollIntoView({behavior:'smooth'});return false;">
+      <a href="#areas" class="btn-scroll-light"
+         onclick="document.getElementById('areas').scrollIntoView({behavior:'smooth'});return false;">
         Lihat Area Layanan
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M12 5v14M5 12l7 7 7-7"/>
+        </svg>
       </a>
     </div>
 
   </div>
 
-  <!-- Wave bawah -->
+  <!-- Wave bawah — smooth ke body -->
   <div class="city-hero-wave">
     <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="width:100%;height:60px;display:block;">
       <path d="M0,20 C360,60 720,0 1080,30 C1260,45 1380,15 1440,25 L1440,60 L0,60 Z" fill="#fdf6ee"/>
@@ -645,14 +808,12 @@ require_once __DIR__ . '/../includes/header.php';
 
       <div class="masonry-areas">
         <?php foreach ($areas as $i => $ar):
-          $size = ($i % 5 === 0) ? 'tall' : (($i % 4 === 0) ? 'short' : '');
           $flowerColors = ['#fda4af','#c9a84c','#86efac','#fda4af','#c9a84c'];
           $fc = $flowerColors[$i % 5];
         ?>
         <a href="<?= BASE_URL ?>/toko-bunga-<?= $ar['slug'] ?>" class="area-mcard">
           <div class="area-mcard-img">
             <div class="area-mcard-img-inner">
-              <!-- Dekoratif bunga mini di bg card -->
               <svg class="area-mcard-flower" width="60" height="60" viewBox="0 0 80 80" fill="none">
                 <?php foreach([0,60,120,180,240,300] as $r): ?>
                 <ellipse cx="40" cy="22" rx="7" ry="16" fill="<?= $fc ?>" transform="rotate(<?= $r ?> 40 40)"/>
@@ -663,7 +824,10 @@ require_once __DIR__ . '/../includes/header.php';
           </div>
           <div class="area-mcard-body">
             <div class="area-mcard-name">
-              <svg class="area-mcard-pin" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+              <svg class="area-mcard-pin" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <circle cx="12" cy="11" r="3"/>
+              </svg>
               <?= clean($ar['name']) ?>
             </div>
             <div class="area-mcard-sub">Toko Bunga <?= clean($ar['name']) ?> →</div>
@@ -705,8 +869,8 @@ require_once __DIR__ . '/../includes/header.php';
         </a>
         <?php endforeach; ?>
         <a href="<?= BASE_URL ?>/toko-bunga-online-24-jam-indonesia" class="prodcat-item">
-          <span class="prodcat-dot" style="background:#e11d48;"></span>
-          <span class="prodcat-name" style="color:#e11d48;">Toko Bunga Online 24 Jam Indonesia →</span>
+          <span class="prodcat-dot" style="background:var(--rose);"></span>
+          <span class="prodcat-name" style="color:var(--rose);">Toko Bunga Online 24 Jam Indonesia →</span>
         </a>
       </div>
     </div>
@@ -721,7 +885,7 @@ require_once __DIR__ . '/../includes/header.php';
         <?php foreach ($featured as $prod): ?>
         <a href="<?= waLink('Halo, saya ingin pesan '.$prod['name'].' di '.$kota) ?>" target="_blank" class="mini-prod-card">
           <div class="mini-prod-img">
-            <img src="<?= UPLOAD_URL.($prod['image']??'') ?>" alt="<?= clean($prod['name']) ?> <?= $kota ?>" onerror="this.style.display:'none'">
+            <img src="<?= UPLOAD_URL.($prod['image']??'') ?>" alt="<?= clean($prod['name']) ?> <?= $kota ?>" onerror="this.style.display='none'">
           </div>
           <div class="mini-prod-body">
             <div class="mini-prod-name"><?= clean($prod['name']) ?></div>
@@ -743,7 +907,9 @@ require_once __DIR__ . '/../includes/header.php';
         <?php foreach ($nearby as $nc): ?>
         <a href="<?= BASE_URL ?>/toko-bunga-<?= $nc['slug'] ?>" class="nearby-city-card">
           <div class="nearby-city-icon">
-            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
           </div>
           <span class="nearby-city-name">Toko Bunga <?= clean($nc['name']) ?></span>
         </a>
@@ -755,7 +921,10 @@ require_once __DIR__ . '/../includes/header.php';
     <!-- SEO STRIP -->
     <div class="city-strip mb-4">
       <div class="city-strip-label">
-        <svg width="11" height="11" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+        <svg width="11" height="11" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          <circle cx="12" cy="11" r="3"/>
+        </svg>
         Produk Tersedia di <?= $kota ?>
       </div>
       <div class="internal-links">
@@ -770,49 +939,93 @@ require_once __DIR__ . '/../includes/header.php';
   </div>
 </div>
 
-<!-- CTA BOTTOM -->
+<!-- ==============================
+     CTA BOTTOM — BRIGHT FLORAL
+     ============================== -->
 <section class="city-cta py-14 px-4 text-center">
-  <div class="city-cta-pat"></div>
-  <div style="position:absolute;width:340px;height:340px;border-radius:50%;background:rgba(244,63,94,0.18);filter:blur(90px);top:-100px;left:50%;transform:translateX(-50%);pointer-events:none;"></div>
-  <div style="position:relative;z-index:2;max-width:500px;margin:0 auto;">
-    <svg width="36" height="36" viewBox="0 0 80 80" fill="none" style="display:inline-block;margin-bottom:.75rem;opacity:.7;">
+  <div class="city-cta-bgimg"></div>
+  <div class="city-cta-overlay"></div>
+  <!-- Soft orbs -->
+  <div class="city-cta-orb" style="width:380px;height:380px;background:rgba(240,160,170,0.18);top:-100px;left:50%;transform:translateX(-50%);"></div>
+  <div class="city-cta-orb" style="width:250px;height:250px;background:rgba(160,200,150,0.12);bottom:-60px;right:10%;"></div>
+
+  <div style="position:relative;z-index:5;max-width:500px;margin:0 auto;">
+
+    <!-- Floral ornament -->
+    <svg width="48" height="48" viewBox="0 0 80 80" fill="none"
+         style="display:inline-block;margin-bottom:.85rem;">
       <?php foreach([0,60,120,180,240,300] as $r): ?>
-      <ellipse cx="40" cy="22" rx="8" ry="18" fill="#fda4af" transform="rotate(<?= $r ?> 40 40)"/>
+      <ellipse cx="40" cy="22" rx="8" ry="18" fill="#e8a0a8" opacity=".60"
+               transform="rotate(<?= $r ?> 40 40)"/>
       <?php endforeach; ?>
-      <circle cx="40" cy="40" r="10" fill="#f9c784"/>
+      <circle cx="40" cy="40" r="10" fill="#f0d0b0" opacity=".9"/>
+      <circle cx="40" cy="40" r="5"  fill="#d49888" opacity=".7"/>
     </svg>
-    <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;color:#fff;margin-bottom:.5rem;">
-      Pesan Bunga di <em style="font-style:italic;color:#f9c784;"><?= $kota ?></em>
+
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;
+               color:#3a2420;margin-bottom:.5rem;line-height:1.15;">
+      Pesan Bunga di <em style="font-style:italic;color:#c0485a;"><?= $kota ?></em>
     </h2>
-    <p style="font-family:'Jost',sans-serif;font-size:.86rem;color:rgba(255,255,255,.7);margin-bottom:1.5rem;line-height:1.65;">
+    <p style="font-family:'Jost',sans-serif;font-size:.86rem;color:rgba(58,36,32,.58);
+              margin-bottom:1.8rem;line-height:1.7;max-width:380px;margin-left:auto;margin-right:auto;">
       Layanan florist online 24 jam — pesan kapan saja, bunga dikirim cepat ke seluruh area <?= $kota ?>.
     </p>
+
+    <!-- Floral divider line -->
+    <div style="display:flex;align-items:center;gap:.8rem;max-width:280px;margin:0 auto 1.8rem;">
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(192,72,90,.25));"></div>
+      <span style="color:rgba(192,72,90,.45);font-size:.75rem;">✿</span>
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(192,72,90,.25),transparent);"></div>
+    </div>
+
     <a href="<?= waLink("Halo, saya ingin pesan bunga di {$kota}") ?>" target="_blank"
-       style="display:inline-flex;align-items:center;gap:.6rem;font-family:'Jost',sans-serif;font-size:.88rem;font-weight:700;background:#fff;color:#e11d48;padding:.85rem 2rem;border-radius:999px;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:all .2s;">
-      <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.096.541 4.063 1.491 5.776L.057 23.04l5.43-1.424A11.947 11.947 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.015-1.371l-.36-.214-3.726.977.995-3.633-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
+       style="display:inline-flex;align-items:center;gap:.65rem;
+              font-family:'Jost',sans-serif;font-size:.88rem;font-weight:700;
+              background:linear-gradient(135deg,#25d366,#128c50);
+              color:#fff;padding:.9rem 2.2rem;border-radius:999px;
+              text-decoration:none;
+              box-shadow:0 8px 28px rgba(18,140,80,.30);
+              transition:all .25s;">
+      <svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.096.541 4.063 1.491 5.776L.057 23.04l5.43-1.424A11.947 11.947 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.015-1.371l-.36-.214-3.726.977.995-3.633-.235-.374A9.818 9.818 0 1112 21.818z"/>
+      </svg>
       Hubungi via WhatsApp
     </a>
   </div>
 </section>
 
-<!-- Stars JS -->
+<!-- JS — Falling Petals (no stars, bright mode) -->
 <script>
 (function(){
-  var c = document.getElementById('city-stars');
+  var c = document.getElementById('city-petals');
   if (!c) return;
-  for (var i = 0; i < 80; i++) {
-    var s = document.createElement('div');
-    s.className = 'city-star';
-    var sz = Math.random() * 2 + .5;
-    s.style.cssText = [
-      'width:'+sz+'px','height:'+sz+'px',
-      'top:'+(Math.random()*65)+'%',
-      'left:'+(Math.random()*100)+'%',
-      '--op:'+(Math.random()*.5+.15),
-      '--dur:'+(Math.random()*3+2)+'s',
-      '--delay:'+(-Math.random()*4)+'s'
+  var colors = [
+    'rgba(240,190,195,.55)',
+    'rgba(255,215,220,.50)',
+    'rgba(245,235,220,.55)',
+    'rgba(210,230,205,.45)',
+    'rgba(250,205,215,.55)',
+    'rgba(240,220,200,.50)',
+  ];
+  for (var i = 0; i < 22; i++) {
+    var p = document.createElement('div');
+    p.className = 'city-petal';
+    var sz  = 6 + Math.random() * 11;
+    var col = colors[Math.floor(Math.random() * colors.length)];
+    var dur = 9 + Math.random() * 10;
+    var del = Math.random() * 14;
+    p.style.cssText = [
+      'width:'  + sz + 'px',
+      'height:' + (sz * 0.58) + 'px',
+      'left:'   + (Math.random() * 100) + '%',
+      'top:-20px',
+      'background:' + col,
+      'animation-duration:' + dur + 's',
+      'animation-delay:' + del + 's',
+      'transform:rotate(' + (Math.random() * 360) + 'deg)',
     ].join(';');
-    c.appendChild(s);
+    c.appendChild(p);
   }
 })();
 </script>
