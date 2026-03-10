@@ -94,7 +94,7 @@
   color: #9a7070;
 }
 
-/* Grid */
+/* Grid — desktop */
 .prod-grid {
   position: relative;
   z-index: 2;
@@ -107,6 +107,92 @@
 }
 @media (min-width: 640px)  { .prod-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 1024px) { .prod-grid { grid-template-columns: repeat(4, 1fr); } }
+
+/* ── MOBILE SLIDER ── */
+@media (max-width: 639px) {
+  .prod-grid-wrap {
+    position: relative;
+    z-index: 2;
+  }
+
+  .prod-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 1rem;
+
+    padding: 0 10vw 1rem; /* was: 0 1.2rem 1rem */
+    scroll-padding: 10vw; /* NEW */
+
+    scrollbar-width: none;
+    max-width: 100%;
+  }
+  .prod-grid::-webkit-scrollbar { display: none; }
+
+  .prod-card {
+    flex: 0 0 78vw; /* was: 72vw */
+    max-width: 260px; /* was: 280px */
+    scroll-snap-align: center; /* was: start */
+  }
+
+  /* Dot indicators */
+  .prod-dots {
+    display: flex;
+    justify-content: center;
+    gap: .5rem;
+    margin-top: 1.2rem;
+  }
+  .prod-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(192,72,90,.2);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background .2s, width .2s;
+  }
+  .prod-dot.active {
+    background: var(--rose, #c0485a);
+    width: 20px;
+    border-radius: 3px;
+  }
+
+  /* Prev/Next arrows */
+  .prod-arrows {
+    display: flex;
+    justify-content: center;
+    gap: .8rem;
+    margin-top: .8rem;
+  }
+  .prod-arrow {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(192,72,90,.25);
+    background: rgba(255,255,255,.85);
+    color: var(--rose, #c0485a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+  }
+  .prod-arrow:hover {
+    background: var(--rose, #c0485a);
+    border-color: var(--rose, #c0485a);
+    color: #fff;
+  }
+  .prod-arrow:disabled {
+    opacity: .3;
+    cursor: default;
+  }
+}
+
+/* Hide dots/arrows on desktop */
+@media (min-width: 640px) {
+  .prod-dots, .prod-arrows { display: none !important; }
+  .prod-grid-wrap { display: contents; }
+}
 
 /* Card */
 .prod-card {
@@ -247,7 +333,6 @@
   transition: color .2s;
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -373,7 +458,8 @@
   </div>
 
   <!-- Grid -->
-  <div class="prod-grid">
+  <div class="prod-grid-wrap">
+    <div class="prod-grid" id="prodSlider">
     <?php foreach ($featured as $i => $prod): ?>
     <div class="prod-card">
 
@@ -411,7 +497,77 @@
       </div>
     </div>
     <?php endforeach; ?>
-  </div>
+    </div><!-- /.prod-grid -->
+
+    <!-- Dots (mobile only) -->
+    <div class="prod-dots" id="prodDots">
+      <?php foreach ($featured as $i => $_): ?>
+      <button class="prod-dot <?= $i===0?'active':'' ?>" data-idx="<?= $i ?>"></button>
+      <?php endforeach; ?>
+    </div>
+
+    <!-- Arrows (mobile only) -->
+    <div class="prod-arrows">
+      <button class="prod-arrow" id="prodPrev" aria-label="Sebelumnya">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="prod-arrow" id="prodNext" aria-label="Berikutnya">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+
+  </div><!-- /.prod-grid-wrap -->
+
+  <script>
+  (function(){
+    if (window.innerWidth >= 640) return;
+    var slider = document.getElementById('prodSlider');
+    var dots   = document.querySelectorAll('.prod-dot');
+    var prev   = document.getElementById('prodPrev');
+    var next   = document.getElementById('prodNext');
+    if (!slider) return;
+
+    var current = 0;
+    var cards   = slider.querySelectorAll('.prod-card');
+    var total   = cards.length;
+
+    function goTo(idx) {
+      if (idx < 0) idx = 0;
+      if (idx >= total) idx = total - 1;
+      current = idx;
+      var gap   = parseFloat(getComputedStyle(slider).gap) || 16;
+      var cardW = cards[0].offsetWidth + gap;
+      slider.scrollTo({ left: cardW * current, behavior: 'smooth' });
+      dots.forEach(function(d, i) { d.classList.toggle('active', i === current); });
+      if (prev) prev.disabled = current === 0;
+      if (next) next.disabled = current === total - 1;
+    }
+
+    if (prev) prev.addEventListener('click', function(){ goTo(current - 1); });
+    if (next) next.addEventListener('click', function(){ goTo(current + 1); });
+    dots.forEach(function(d) {
+      d.addEventListener('click', function(){ goTo(parseInt(this.dataset.idx)); });
+    });
+
+    var scrollTimer;
+    slider.addEventListener('scroll', function() {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(function() {
+        var gap   = parseFloat(getComputedStyle(slider).gap) || 16;
+        var cardW = cards[0].offsetWidth + gap;
+        var idx   = Math.round(slider.scrollLeft / cardW);
+        if (idx !== current) {
+          current = idx;
+          dots.forEach(function(d, i){ d.classList.toggle('active', i === current); });
+          if (prev) prev.disabled = current === 0;
+          if (next) next.disabled = current === total - 1;
+        }
+      }, 80);
+    }, { passive: true });
+
+    goTo(0);
+  })();
+  </script>
 
   <!-- Footer ornament -->
   <div class="prod-footer">
