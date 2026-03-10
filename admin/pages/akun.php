@@ -192,9 +192,14 @@ if ($action === 'tambah' || ($action === 'edit' && $id)):
       </div>
 
       <div class="flex items-center gap-2">
-        <input type="checkbox" name="is_active" id="is_active_a"
-               <?= $item['is_active'] ? 'checked' : '' ?>
-               <?= ($action === 'edit' && $id === $meId) ? 'disabled' : '' ?>>
+      <?php if ($action === 'edit' && $id === $meId): ?>
+<!-- Hidden input agar nilai is_active tetap terkirim meski checkbox tidak bisa diklik -->
+<input type="hidden" name="is_active" value="1">
+<input type="checkbox" id="is_active_a" checked disabled>
+<?php else: ?>
+<input type="checkbox" name="is_active" id="is_active_a"
+       <?= $item['is_active'] ? 'checked' : '' ?>>
+<?php endif; ?>
         <label for="is_active_a" class="text-sm text-gray-700 cursor-pointer">Akun aktif</label>
         <?php if ($action === 'edit' && $id === $meId): ?>
         <span class="text-xs text-gray-400">(tidak bisa menonaktifkan akun sendiri)</span>
