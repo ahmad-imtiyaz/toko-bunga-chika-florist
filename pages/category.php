@@ -98,7 +98,7 @@ require_once __DIR__ . '/../includes/header.php';
     </ul>
     <h2>Cara Pesan <?= $nama ?></h2>
     <p>1. Pilih produk <?= $nama ?>. 2. Hubungi admin via WhatsApp. 3. Kirim detail ucapan dan alamat. 4. Pesanan diproses dan langsung dikirim.</p>
-    <p>Produk ini dapat dipesan melalui layanan <a href="/">toko bunga online 24 jam Indonesia</a> Chika Florist.</p>
+    <p>Produk ini dapat dipesan melalui layanan <a href="<?= BASE_URL ?>/">toko bunga online 24 jam Indonesia</a> Chika Florist.</p>
   </div>
 
   <?php if (!empty($cities)): ?>
