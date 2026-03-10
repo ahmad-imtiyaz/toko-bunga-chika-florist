@@ -43,10 +43,12 @@ require_once __DIR__ . '/../includes/header.php';
       </div>
     </div>
     <div class="flex-shrink-0 w-full max-w-sm lg:max-w-md">
-      <div class="rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-gradient-to-br from-rose-100 to-amber-100 h-72 lg:h-96 flex items-center justify-center">
-        <img src="<?= UPLOAD_URL ?>hero-bunga.jpg" alt="toko bunga online 24 jam Indonesia Chika Florist"
-             class="w-full h-full object-cover" onerror="this.style.display='none'">
-      </div>
+   <div class="rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-gradient-to-br from-rose-100 to-amber-100 h-72 lg:h-96 flex items-center justify-center">
+  <img src="<?= BASE_URL ?>/assets/images/1a.jpg" 
+       alt="toko bunga online 24 jam Indonesia Chika Florist"
+       class="w-full h-full object-cover"
+       onerror="this.style.display='none'">
+</div>
     </div>
   </div>
 </section>
