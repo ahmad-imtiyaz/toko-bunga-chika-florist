@@ -569,11 +569,50 @@
     goTo(0);
   })();
   </script>
+    <!-- Footer CTA — Eksplorasi Semua Produk -->
+  <div class="prod-footer">
+    <div class="prod-footer-ornament">✦ &nbsp; ✿ &nbsp; ✦</div>
+    <a href="<?= BASE_URL ?>/produk"
+       style="
+         display: inline-flex;
+         align-items: center;
+         gap: .55rem;
+         font-family: 'Jost', sans-serif;
+         font-size: .85rem;
+         font-weight: 700;
+         color: #fff;
+         background: linear-gradient(135deg, #c0485a, #9f1239);
+         padding: .85rem 2rem;
+         border-radius: 999px;
+         text-decoration: none;
+         box-shadow: 0 6px 20px rgba(192,72,90,.3);
+         transition: all .25s;
+         letter-spacing: .02em;
+       "
+       onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(192,72,90,.4)'"
+       onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(192,72,90,.3)'">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      Eksplorasi Semua Produk
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+    <p style="font-family:'Jost',sans-serif;font-size:.75rem;color:#9a7070;margin-top:.75rem;">
+      <?php
+        $totalProd = $pdo->query("SELECT COUNT(*) FROM products WHERE is_active=1")->fetchColumn();
+        echo $totalProd . '+ produk bunga tersedia';
+      ?>
+    </p>
+  </div>
 
   <!-- Footer ornament -->
   <div class="prod-footer">
     <div class="prod-footer-ornament">✦ &nbsp; ✿ &nbsp; ✦</div>
   </div>
+  
 
 </section>
 <?php endif; ?>

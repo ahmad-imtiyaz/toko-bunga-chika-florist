@@ -37,6 +37,12 @@ if ($request === 'galeri') {
     require __DIR__ . '/pages/gallery.php'; exit();
 }
 
+// ── Produk ───────────────────────────────────────────────
+
+if ($request === 'produk') {
+    require __DIR__ . '/pages/products.php'; exit();
+}
+
 // ── Detail Produk: /produk/[slug] ─────────────────────────
 if (strpos($request, 'produk/') === 0) {
     $prodSlug = substr($request, 7);
