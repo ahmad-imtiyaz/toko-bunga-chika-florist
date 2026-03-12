@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
+$logo           = getSetting('logo', 'logo.jpeg');
+
 if (isset($_GET['logout'])) { session_destroy(); redirect(BASE_URL . '/admin/'); }
 if (isAdminLoggedIn()) redirect(BASE_URL . '/admin/dashboard');
 $error = '';
@@ -26,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login Admin – Chika Florist</title>
 <meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/jpeg" href="<?= UPLOAD_URL . $logo ?>">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <style>body{font-family:'Lato',sans-serif}.font-display{font-family:'Playfair Display',serif}</style>

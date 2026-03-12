@@ -4,6 +4,7 @@ requireAdminLogin();
 $current_page = basename($_SERVER['PHP_SELF'], '.php');
 $admin_name   = $_SESSION['admin_name'] ?? 'Admin';
 $admin_title  = $admin_title ?? 'Admin Panel';
+$logo           = getSetting('logo', 'logo.jpeg');
 
 $nav_items = [
     ['href'=> BASE_URL . '/admin/dashboard', 'label'=>'Dashboard',  'icon'=>'🏠', 'page'=>'dashboard'],
@@ -25,6 +26,7 @@ $nav_items = [
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= clean($admin_title) ?> – Admin Chika Florist</title>
 <meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/jpeg" href="<?= UPLOAD_URL . $logo ?>">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <style>

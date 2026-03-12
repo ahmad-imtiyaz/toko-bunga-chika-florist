@@ -25,6 +25,7 @@ $base           = BASE_URL;
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="<?= clean($site_name) ?>">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/jpeg" href="<?= UPLOAD_URL . $logo ?>">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = {
