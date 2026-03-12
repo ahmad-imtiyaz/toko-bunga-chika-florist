@@ -33,7 +33,8 @@ $avgRating = 0;
 try { $avgRating = round((float)$pdo->query("SELECT AVG(rating) FROM testimonials WHERE is_active=1")->fetchColumn(), 1); } catch(Exception $e){}
 
 $recentProducts     = safeFetch($pdo, "SELECT p.name,p.price_min,p.price_max,p.is_active,c.name as cat_name FROM products p LEFT JOIN categories c ON p.category_id=c.id ORDER BY p.id DESC LIMIT 5");
-$recentTestimonials = safeFetch($pdo, "SELECT customer_name,city,rating,is_active FROM testimonials ORDER BY id DESC LIMIT 4");
+// FIX: customer_city (bukan city) + tambah kolom content
+$recentTestimonials = safeFetch($pdo, "SELECT customer_name,customer_city,rating,content,is_active FROM testimonials ORDER BY id DESC LIMIT 4");
 
 $hour  = (int)date('H');
 $greet = $hour < 11 ? '🌅 Selamat pagi' : ($hour < 15 ? '☀️ Selamat siang' : ($hour < 18 ? '🌤️ Selamat sore' : '🌙 Selamat malam'));
@@ -154,16 +155,25 @@ require_once __DIR__ . '/../includes/admin_header.php';
           $initials = strtoupper(mb_substr($t['customer_name'],0,1));
           $color = $avatarColors[abs(crc32($t['customer_name'])) % 4];
       ?>
-        <div class="flex items-center gap-3 px-4 py-3">
-          <div class="w-8 h-8 rounded-full <?= $color ?> flex items-center justify-center text-xs font-bold flex-shrink-0"><?= $initials ?></div>
-          <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold text-gray-800 truncate"><?= clean($t['customer_name']) ?></p>
-            <p class="text-xs text-gray-400"><?= clean($t['city'] ?? '—') ?></p>
+        <div class="px-4 py-3 hover:bg-purple-50/40 transition-colors">
+          <!-- Baris atas: avatar + nama + kota + rating -->
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full <?= $color ?> flex items-center justify-center text-xs font-bold flex-shrink-0"><?= $initials ?></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-semibold text-gray-800 truncate"><?= clean($t['customer_name']) ?></p>
+              <p class="text-xs text-gray-400"><?= clean($t['customer_city'] ?? '—') ?></p>
+            </div>
+            <div class="flex-shrink-0 text-right">
+              <p class="text-xs text-amber-500"><?= str_repeat('★',(int)$t['rating']) ?><span class="text-gray-200"><?= str_repeat('★',5-(int)$t['rating']) ?></span></p>
+              <span class="text-xs <?= $t['is_active'] ? 'text-green-500' : 'text-gray-300' ?>"><?= $t['is_active'] ? '● Aktif' : '● Nonaktif' ?></span>
+            </div>
           </div>
-          <div class="flex-shrink-0 text-right">
-            <p class="text-xs text-amber-500"><?= str_repeat('★',(int)$t['rating']) ?><span class="text-gray-200"><?= str_repeat('★',5-(int)$t['rating']) ?></span></p>
-            <span class="text-xs <?= $t['is_active'] ? 'text-green-500' : 'text-gray-300' ?>"><?= $t['is_active'] ? '● Aktif' : '● Nonaktif' ?></span>
-          </div>
+          <!-- Baris bawah: isi testimoni -->
+          <?php if (!empty($t['content'])): ?>
+          <p class="text-xs text-gray-500 italic mt-1.5 leading-relaxed" style="display:-webkit-box;-webkit-line-clamp:2;line-clamp: 2;-webkit-box-orient:vertical;overflow:hidden;">
+            "<?= clean(mb_substr($t['content'], 0, 100)) ?><?= mb_strlen($t['content']) > 100 ? '…' : '' ?>"
+          </p>
+          <?php endif; ?>
         </div>
       <?php endforeach; endif; ?>
     </div>
