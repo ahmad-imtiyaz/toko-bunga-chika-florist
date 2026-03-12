@@ -10,24 +10,39 @@ $logo           = getSetting('logo', 'logo.jpeg');
 $base           = BASE_URL;
 
 // ── Data Navbar ──────────────────────────────────────────────
-// Layanan: parent categories + their children
-$navParentCats = getMainCategories(); // parent_id IS NULL
+
+// LAYANAN: parent categories + children
+$navParentCats  = getMainCategories();
 $navCatChildren = [];
 foreach ($navParentCats as $parent) {
     $navCatChildren[$parent['id']] = getSubCategories($parent['id']);
 }
 
-// Area Layanan: cities + their areas
-$navCities = getActiveCities(0); // semua kota aktif
-$navAreas  = [];
-foreach ($navCities as $city) {
-    $areas = getAreasByCity($city['id']);
-    if (!empty($areas)) {
-        $navAreas[$city['id']] = $areas;
-    }
+// AREA LAYANAN: query langsung agar pasti include kolom province & tier
+$allCities = getDB()->query(
+    "SELECT id, name, slug, province, tier
+     FROM cities
+     WHERE is_active=1
+     ORDER BY province ASC, tier ASC, sort_order ASC, name ASC"
+)->fetchAll();
+
+// Preload areas per city
+$navAreas = [];
+foreach ($allCities as $city) {
+    $navAreas[$city['id']] = getAreasByCity($city['id']);
 }
-// Batasi cities untuk ditampilkan di nav (max 10, sisanya "Lihat Semua")
-$navCitiesDisplay = array_slice($navCities, 0, 10);
+
+// Group by province → ['Banten'=>[...], 'DKI Jakarta'=>[...], 'Jawa Barat'=>[...]]
+$navProvinces = [];
+foreach ($allCities as $city) {
+    $prov = trim((string)($city['province'] ?? ''));
+    if ($prov === '') $prov = 'Lainnya';
+    $navProvinces[$prov][] = $city;
+}
+ksort($navProvinces); // A-Z
+
+// Tampilkan semua provinsi di desktop (tidak dibatasi)
+$navProvincesDisplay = $navProvinces;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -48,9 +63,7 @@ $navCitiesDisplay = array_slice($navCities, 0, 10);
 <script>
 tailwind.config = {
   theme: { extend: {
-    colors: {
-      warm: { 50:'#fdf8f0', 100:'#faf0dc', 200:'#f5e0b5' }
-    },
+    colors: { warm: { 50:'#fdf8f0', 100:'#faf0dc', 200:'#f5e0b5' } },
     fontFamily: {
       display: ['"Playfair Display"', 'Georgia', 'serif'],
       body:    ['"Lato"', 'sans-serif'],
@@ -64,20 +77,16 @@ tailwind.config = {
 
 <style>
 /* ════════════════════════════════════════════════
-   DESKTOP FLYOUT MENU
+   DESKTOP FLYOUT — shared base
    ════════════════════════════════════════════════ */
+.nav-dropdown { position: relative; }
 
-/* Level-1 dropdown wrapper */
-.nav-dropdown {
-  position: relative;
-}
-
-/* Level-1 panel */
+/* L1 panel (muncul dari navbar) */
 .nav-panel {
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  min-width: 220px;
+  min-width: 210px;
   background: #fff;
   border: 1px solid #fce7f3;
   border-radius: 14px;
@@ -92,13 +101,12 @@ tailwind.config = {
 }
 .nav-dropdown:hover .nav-panel,
 .nav-dropdown:focus-within .nav-panel {
-  opacity: 1;
-  visibility: visible;
+  opacity: 1; visibility: visible;
   transform: translateY(0);
   pointer-events: auto;
 }
 
-/* Level-1 item */
+/* Item di dalam panel (bisa jadi parent flyout L2/L3) */
 .nav-panel-item {
   display: flex;
   align-items: center;
@@ -113,28 +121,27 @@ tailwind.config = {
   transition: background .15s, color .15s;
   white-space: nowrap;
   position: relative;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
 }
-.nav-panel-item:hover {
-  background: #fdf2f8;
-  color: #be185d;
-}
-.nav-panel-item .chevron-right {
-  width: 14px; height: 14px;
+.nav-panel-item:hover { background: #fdf2f8; color: #be185d; }
+.nav-panel-item .chev-r {
+  width: 13px; height: 13px;
   color: #d1d5db;
   flex-shrink: 0;
   transition: color .15s;
 }
-.nav-panel-item:hover .chevron-right {
-  color: #be185d;
-}
+.nav-panel-item:hover .chev-r { color: #be185d; }
 
-/* Level-2 flyout (child panel) */
+/* Flyout generic (L2 dan L3 pakai class ini) */
 .nav-flyout {
   position: absolute;
   top: -6px;
   left: 100%;
-  min-width: 200px;
-  max-width: 240px;
+  min-width: 190px;
+  max-width: 230px;
   background: #fff;
   border: 1px solid #fce7f3;
   border-radius: 14px;
@@ -147,34 +154,36 @@ tailwind.config = {
   z-index: 201;
   pointer-events: none;
 }
-/* Bridge gap so cursor can travel from item to flyout */
+/* bridge gap */
 .nav-flyout::before {
   content: '';
   position: absolute;
   top: 0; left: -12px;
   width: 12px; height: 100%;
 }
-
-.has-flyout:hover .nav-flyout,
-.has-flyout:focus-within .nav-flyout {
-  opacity: 1;
-  visibility: visible;
+.has-flyout:hover > .nav-flyout,
+.has-flyout:focus-within > .nav-flyout {
+  opacity: 1; visibility: visible;
   transform: translateX(0);
   pointer-events: auto;
 }
 
-/* If flyout would overflow right side, open to left */
+/* L3 flyout (lebih dalam, z-index lebih tinggi) */
+.nav-flyout .nav-flyout {
+  z-index: 202;
+}
+
+/* open-left: flyout buka ke kiri kalau overflow */
 .nav-flyout.open-left {
-  left: auto;
-  right: 100%;
+  left: auto; right: 100%;
   transform: translateX(-6px);
 }
-.has-flyout:hover .nav-flyout.open-left,
-.has-flyout:focus-within .nav-flyout.open-left {
+.has-flyout:hover > .nav-flyout.open-left,
+.has-flyout:focus-within > .nav-flyout.open-left {
   transform: translateX(0);
 }
 
-/* Level-2 items (children) */
+/* Item di dalam flyout (leaf link) */
 .nav-flyout-item {
   display: flex;
   align-items: center;
@@ -193,265 +202,12 @@ tailwind.config = {
   border-radius: 50%;
   flex-shrink: 0;
 }
-.nav-flyout-item:hover {
-  background: #fdf2f8;
-  color: #be185d;
-}
-.nav-flyout-item::before:hover {
-  background: #be185d;
-}
+.nav-flyout-item:hover { background: #fdf2f8; color: #be185d; }
 
-/* Divider inside panel */
-.nav-panel-divider {
-  height: 1px;
-  background: #fce7f3;
-  margin: 4px 0;
-}
+/* Divider */
+.nav-panel-divider { height: 1px; background: #fce7f3; margin: 4px 0; }
 
-/* Dot indicator on nav trigger */
-.nav-trigger {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #374151;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  transition: color .15s;
-}
-.nav-trigger:hover, .nav-dropdown:hover .nav-trigger {
-  color: #be185d;
-}
-.nav-trigger svg {
-  width: 12px; height: 12px;
-  transition: transform .2s ease;
-}
-.nav-dropdown:hover .nav-trigger svg {
-  transform: rotate(180deg);
-}
-
-/* ════════════════════════════════════════════════
-   MOBILE DRAWER
-   ════════════════════════════════════════════════ */
-#mobileDrawer {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  visibility: hidden;
-}
-#mobileDrawer.open {
-  visibility: visible;
-}
-#drawerBackdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0);
-  transition: background .3s ease;
-}
-#mobileDrawer.open #drawerBackdrop {
-  background: rgba(0,0,0,0.45);
-}
-#drawerPanel {
-  position: absolute;
-  top: 0; left: 0; bottom: 0;
-  width: 310px;
-  max-width: 88vw;
-  background: #fff;
-  transform: translateX(-100%);
-  transition: transform .32s cubic-bezier(.4,0,.2,1);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 4px 0 28px rgba(0,0,0,0.13);
-}
-#mobileDrawer.open #drawerPanel {
-  transform: translateX(0);
-}
-
-/* Drawer header */
-.drawer-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.2rem;
-  border-bottom: 1px solid #fce7f3;
-  flex-shrink: 0;
-  background: linear-gradient(135deg,#fff8f8 0%,#fdf6ee 100%);
-}
-.drawer-body {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 1.5rem;
-}
-
-/* Level-1 accordion item */
-.dacc-l1-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 0.78rem 1.25rem;
-  font-size: 0.925rem;
-  font-weight: 700;
-  color: #374151;
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-  transition: background .15s, color .15s;
-  text-decoration: none;
-}
-.dacc-l1-btn:hover { background: #fdf2f8; color: #be185d; }
-.dacc-l1-btn.is-open { color: #be185d; }
-.dacc-l1-btn .dacc-icon {
-  display: flex; align-items: center; gap: 8px;
-}
-.dacc-l1-btn .dacc-chevron {
-  width: 15px; height: 15px;
-  color: #9ca3af;
-  flex-shrink: 0;
-  transition: transform .25s ease, color .15s;
-}
-.dacc-l1-btn.is-open .dacc-chevron {
-  transform: rotate(180deg);
-  color: #be185d;
-}
-
-/* Level-1 accordion body */
-.dacc-l1-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height .35s cubic-bezier(.4,0,.2,1);
-  background: #fdfaff;
-}
-.dacc-l1-body.is-open {
-  max-height: 2000px;
-}
-
-/* Direct link inside level-1 body (no children) */
-.dacc-l1-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0.65rem 1.25rem 0.65rem 2.25rem;
-  font-size: 0.875rem;
-  color: #6b7280;
-  text-decoration: none;
-  transition: background .15s, color .15s;
-}
-.dacc-l1-link::before {
-  content: '';
-  width: 5px; height: 5px;
-  background: #f9a8d4;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.dacc-l1-link:hover { background: #fce7f3; color: #be185d; }
-
-/* Level-2 accordion (parent category / kota) */
-.dacc-l2-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 0.65rem 1.25rem 0.65rem 2rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #4b5563;
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-  transition: background .15s, color .15s;
-  border-left: 3px solid #fce7f3;
-  margin-left: 1.25rem;
-}
-.dacc-l2-btn:hover { background: #fce7f3; color: #be185d; }
-.dacc-l2-btn.is-open { color: #be185d; border-left-color: #be185d; }
-.dacc-l2-btn .dacc-chevron {
-  width: 13px; height: 13px;
-  color: #d1d5db;
-  flex-shrink: 0;
-  transition: transform .2s ease, color .15s;
-}
-.dacc-l2-btn.is-open .dacc-chevron {
-  transform: rotate(180deg);
-  color: #be185d;
-}
-
-/* Level-2 accordion body */
-.dacc-l2-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height .3s cubic-bezier(.4,0,.2,1);
-  background: #fff8fc;
-  margin-left: 1.25rem;
-  border-left: 3px solid #fce7f3;
-}
-.dacc-l2-body.is-open {
-  max-height: 800px;
-}
-
-/* Level-2 child link */
-.dacc-l2-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0.55rem 1rem 0.55rem 1.5rem;
-  font-size: 0.825rem;
-  color: #9ca3af;
-  text-decoration: none;
-  transition: background .15s, color .15s;
-}
-.dacc-l2-link::before {
-  content: '';
-  width: 4px; height: 4px;
-  background: #fca5a5;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.dacc-l2-link:hover { background: #fce7f3; color: #be185d; }
-
-/* Drawer divider */
-.drawer-divider {
-  height: 1px;
-  background: #f3f4f6;
-  margin: 0.35rem 1.25rem;
-}
-/* Drawer section label */
-.drawer-section-label {
-  padding: 0.75rem 1.25rem 0.25rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #d1d5db;
-  text-transform: uppercase;
-}
-/* Drawer footer */
-.drawer-footer {
-  padding: 1rem 1.25rem;
-  border-top: 1px solid #fce7f3;
-  flex-shrink: 0;
-}
-
-/* Hamburger → X */
-.ham-line {
-  display: block;
-  width: 20px; height: 2px;
-  background: #374151;
-  border-radius: 2px;
-  transition: transform .25s ease, opacity .2s ease;
-  transform-origin: center;
-}
-#menuToggle.is-open .ham-line:nth-child(1) { transform: translateY(6px) rotate(45deg); }
-#menuToggle.is-open .ham-line:nth-child(2) { opacity: 0; }
-#menuToggle.is-open .ham-line:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
-
-/* Lihat semua link */
+/* "Lihat semua" link di bawah panel */
 .see-all-link {
   display: flex;
   align-items: center;
@@ -465,6 +221,205 @@ tailwind.config = {
   margin-top: 4px;
 }
 .see-all-link:hover { background: #fdf2f8; }
+
+/* Nav trigger button */
+.nav-trigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color .15s;
+  text-decoration: none;
+}
+.nav-trigger:hover, .nav-dropdown:hover .nav-trigger { color: #be185d; }
+.nav-trigger svg { width: 12px; height: 12px; transition: transform .2s ease; }
+.nav-dropdown:hover .nav-trigger svg { transform: rotate(180deg); }
+
+/* ════════════════════════════════════════════════
+   MOBILE DRAWER
+   ════════════════════════════════════════════════ */
+#mobileDrawer {
+  position: fixed; inset: 0;
+  z-index: 9999; visibility: hidden;
+}
+#mobileDrawer.open { visibility: visible; }
+#drawerBackdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0);
+  transition: background .3s ease;
+}
+#mobileDrawer.open #drawerBackdrop { background: rgba(0,0,0,0.45); }
+#drawerPanel {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 310px; max-width: 88vw;
+  background: #fff;
+  transform: translateX(-100%);
+  transition: transform .32s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  box-shadow: 4px 0 28px rgba(0,0,0,0.13);
+}
+#mobileDrawer.open #drawerPanel { transform: translateX(0); }
+
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid #fce7f3;
+  flex-shrink: 0;
+  background: linear-gradient(135deg,#fff8f8 0%,#fdf6ee 100%);
+}
+.drawer-body {
+  flex: 1; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 1.5rem;
+}
+
+/* ── L1 (Beranda, Layanan, Area Layanan, dll) ── */
+.dacc-l1-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 0.78rem 1.25rem;
+  font-size: 0.925rem; font-weight: 700;
+  color: #374151;
+  background: none; border: none;
+  cursor: pointer; text-align: left;
+  transition: background .15s, color .15s;
+  text-decoration: none;
+}
+.dacc-l1-btn:hover { background: #fdf2f8; color: #be185d; }
+.dacc-l1-btn.is-open { color: #be185d; }
+.dacc-l1-btn .dacc-icon { display: flex; align-items: center; gap: 8px; }
+.dacc-l1-btn .dacc-chevron {
+  width: 15px; height: 15px; color: #9ca3af;
+  flex-shrink: 0; transition: transform .25s ease, color .15s;
+}
+.dacc-l1-btn.is-open .dacc-chevron { transform: rotate(180deg); color: #be185d; }
+
+.dacc-l1-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s cubic-bezier(.4,0,.2,1);
+  background: #fdfaff;
+}
+.dacc-l1-body.is-open { max-height: 3000px; }
+
+/* Link langsung di dalam L1 (tanpa sub) */
+.dacc-l1-link {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0.65rem 1.25rem 0.65rem 2.25rem;
+  font-size: 0.875rem; color: #6b7280;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.dacc-l1-link::before {
+  content: ''; width: 5px; height: 5px;
+  background: #f9a8d4; border-radius: 50%; flex-shrink: 0;
+}
+.dacc-l1-link:hover { background: #fce7f3; color: #be185d; }
+
+/* ── L2 (parent category / PROVINSI) ── */
+.dacc-l2-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 1rem 0.65rem 1.75rem;
+  font-size: 0.875rem; font-weight: 700;
+  color: #4b5563;
+  background: none; border: none;
+  cursor: pointer; text-align: left;
+  transition: background .15s, color .15s;
+  border-left: 3px solid #fce7f3;
+  margin-left: 1.25rem;
+}
+.dacc-l2-btn:hover { background: #fce7f3; color: #be185d; }
+.dacc-l2-btn.is-open { color: #be185d; border-left-color: #be185d; }
+.dacc-l2-btn .dacc-chevron {
+  width: 13px; height: 13px; color: #d1d5db;
+  flex-shrink: 0; transition: transform .2s ease, color .15s;
+}
+.dacc-l2-btn.is-open .dacc-chevron { transform: rotate(180deg); color: #be185d; }
+
+.dacc-l2-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height .3s cubic-bezier(.4,0,.2,1);
+  background: #fff8fc;
+  margin-left: 1.25rem;
+  border-left: 3px solid #fce7f3;
+}
+.dacc-l2-body.is-open { max-height: 2000px; }
+
+/* ── L3 (KOTA — bisa expand ke area) ── */
+.dacc-l3-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%;
+  padding: 0.55rem 1rem 0.55rem 1.5rem;
+  font-size: 0.85rem; font-weight: 600;
+  color: #6b7280;
+  background: none; border: none;
+  cursor: pointer; text-align: left;
+  transition: background .15s, color .15s;
+  border-left: 2px solid #fce7f3;
+  margin-left: 1rem;
+}
+.dacc-l3-btn:hover { background: #fce7f3; color: #be185d; }
+.dacc-l3-btn.is-open { color: #be185d; border-left-color: #f9a8d4; }
+.dacc-l3-btn .dacc-chevron {
+  width: 12px; height: 12px; color: #e5e7eb;
+  flex-shrink: 0; transition: transform .18s ease, color .15s;
+}
+.dacc-l3-btn.is-open .dacc-chevron { transform: rotate(180deg); color: #be185d; }
+
+.dacc-l3-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height .28s cubic-bezier(.4,0,.2,1);
+  background: #fff5f9;
+  margin-left: 1rem;
+  border-left: 2px solid #fce7f3;
+}
+.dacc-l3-body.is-open { max-height: 1000px; }
+
+/* ── L3 leaf link (area) ── */
+.dacc-l3-link {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0.45rem 0.75rem 0.45rem 1.25rem;
+  font-size: 0.8rem; color: #9ca3af;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.dacc-l3-link::before {
+  content: ''; width: 4px; height: 4px;
+  background: #fca5a5; border-radius: 50%; flex-shrink: 0;
+}
+.dacc-l3-link:hover { background: #fce7f3; color: #be185d; }
+
+/* Dividers & labels */
+.drawer-divider { height: 1px; background: #f3f4f6; margin: 0.35rem 1.25rem; }
+.drawer-section-label {
+  padding: 0.75rem 1.25rem 0.25rem;
+  font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.08em; color: #d1d5db;
+  text-transform: uppercase;
+}
+.drawer-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #fce7f3;
+  flex-shrink: 0;
+}
+
+/* Hamburger → X */
+.ham-line {
+  display: block; width: 20px; height: 2px;
+  background: #374151; border-radius: 2px;
+  transition: transform .25s ease, opacity .2s ease;
+  transform-origin: center;
+}
+#menuToggle.is-open .ham-line:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+#menuToggle.is-open .ham-line:nth-child(2) { opacity: 0; }
+#menuToggle.is-open .ham-line:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 </style>
 
 <script type="application/ld+json">
@@ -480,11 +435,10 @@ tailwind.config = {
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 <div class="flex items-center justify-between h-16">
 
-  <!-- ── Logo ── -->
+  <!-- Logo -->
   <a href="<?= $base ?>/" class="flex items-center gap-3 shrink-0">
     <img src="<?= UPLOAD_URL . $logo ?>" alt="<?= clean($site_name) ?>"
-         class="h-10 w-auto object-contain"
-         onerror="this.style.display='none'">
+         class="h-10 w-auto object-contain" onerror="this.style.display='none'">
     <div class="leading-tight">
       <p class="font-display font-bold text-rose-700 text-lg leading-none"><?= clean($site_name) ?></p>
       <?php if ($site_tagline): ?>
@@ -493,33 +447,29 @@ tailwind.config = {
     </div>
   </a>
 
-  <!-- ── Desktop Nav ── -->
+  <!-- Desktop Nav -->
   <nav class="hidden lg:flex items-center gap-7 text-sm" aria-label="Navigasi utama">
 
-    <!-- Beranda -->
     <a href="<?= $base ?>/" class="nav-trigger">Beranda</a>
 
-    <!-- ── LAYANAN (dropdown level-1 + flyout level-2) ── -->
+    <!-- ── LAYANAN: L1 panel → L2 flyout ── -->
     <div class="nav-dropdown">
-      <button class="nav-trigger" aria-haspopup="true" aria-expanded="false">
+      <button class="nav-trigger" aria-haspopup="true">
         Layanan
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
         </svg>
       </button>
-
       <div class="nav-panel" role="menu">
         <?php foreach ($navParentCats as $parent):
           $children = $navCatChildren[$parent['id']] ?? [];
         ?>
           <?php if (!empty($children)): ?>
-            <!-- Parent dengan children → has flyout -->
             <div class="has-flyout nav-panel-item" role="none" tabindex="0">
               <span><?= clean($parent['name']) ?></span>
-              <svg class="chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="chev-r" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
               </svg>
-              <!-- Level-2 flyout: children of this parent -->
               <div class="nav-flyout" role="menu">
                 <a href="<?= $base ?>/<?= $parent['slug'] ?>" class="nav-flyout-item" role="menuitem">
                   Semua <?= clean($parent['name']) ?>
@@ -533,7 +483,6 @@ tailwind.config = {
               </div>
             </div>
           <?php else: ?>
-            <!-- Parent tanpa children → direct link -->
             <a href="<?= $base ?>/<?= $parent['slug'] ?>" class="nav-panel-item" role="menuitem">
               <?= clean($parent['name']) ?>
             </a>
@@ -542,62 +491,82 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- ── AREA LAYANAN (dropdown level-1: cities, flyout level-2: areas) ── -->
+    <!-- ── AREA LAYANAN: L1 panel (provinsi) → L2 flyout (kota) → L3 flyout (area) ── -->
     <div class="nav-dropdown">
-      <button class="nav-trigger" aria-haspopup="true" aria-expanded="false">
+      <button class="nav-trigger" aria-haspopup="true">
         Area Layanan
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
         </svg>
       </button>
-
       <div class="nav-panel" role="menu">
-        <?php foreach ($navCitiesDisplay as $city):
-          $areas = $navAreas[$city['id']] ?? [];
-        ?>
-          <?php if (!empty($areas)): ?>
-            <!-- Kota dengan areas → has flyout -->
-            <div class="has-flyout nav-panel-item" role="none" tabindex="0">
-              <span><?= clean($city['name']) ?></span>
-              <svg class="chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
-              </svg>
-              <div class="nav-flyout" role="menu">
-                <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="nav-flyout-item" role="menuitem">
-                  Semua Area <?= clean($city['name']) ?>
-                </a>
-                <div class="nav-panel-divider"></div>
-                <?php foreach ($areas as $area): ?>
-                <a href="<?= $base ?>/toko-bunga-<?= $area['slug'] ?>" class="nav-flyout-item" role="menuitem">
-                  <?= clean($area['name']) ?>
-                </a>
-                <?php endforeach; ?>
-              </div>
+
+        <?php foreach ($navProvincesDisplay as $provName => $provCities): ?>
+          <!-- L1 item: Provinsi → flyout L2 berisi kota-kota -->
+          <div class="has-flyout nav-panel-item" role="none" tabindex="0">
+            <span><?= clean($provName) ?></span>
+            <svg class="chev-r" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+            </svg>
+
+            <!-- L2 flyout: Kota-kota dalam provinsi ini -->
+            <div class="nav-flyout" role="menu">
+              <?php foreach ($provCities as $city):
+                $areas = $navAreas[$city['id']] ?? [];
+              ?>
+                <?php if (!empty($areas)): ?>
+                  <!-- Kota punya area → flyout L3 -->
+                  <div class="has-flyout nav-panel-item" role="none" tabindex="0" style="font-weight:500;">
+                    <span><?= clean($city['name']) ?></span>
+                    <svg class="chev-r" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                    </svg>
+
+                    <!-- L3 flyout: Area dalam kota ini -->
+                    <div class="nav-flyout" role="menu">
+                      <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="nav-flyout-item" role="menuitem">
+                        Semua Area <?= clean($city['name']) ?>
+                      </a>
+                      <div class="nav-panel-divider"></div>
+                      <?php foreach ($areas as $area): ?>
+                      <a href="<?= $base ?>/toko-bunga-<?= $area['slug'] ?>" class="nav-flyout-item" role="menuitem">
+                        <?= clean($area['name']) ?>
+                      </a>
+                      <?php endforeach; ?>
+                    </div>
+                  </div>
+
+                <?php else: ?>
+                  <!-- Kota tanpa area → direct link -->
+                  <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="nav-flyout-item" role="menuitem">
+                    <?= clean($city['name']) ?>
+                  </a>
+                <?php endif; ?>
+              <?php endforeach; ?>
             </div>
-          <?php else: ?>
-            <!-- Kota tanpa areas → direct link -->
-            <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="nav-panel-item" role="menuitem">
-              <?= clean($city['name']) ?>
-            </a>
-          <?php endif; ?>
+            <!-- /L2 flyout -->
+
+          </div>
+          <!-- /L1 item provinsi -->
         <?php endforeach; ?>
 
-        <?php if (count($navCities) > count($navCitiesDisplay)): ?>
+        <?php if (count($navProvinces) > count($navProvincesDisplay)): ?>
         <div class="nav-panel-divider"></div>
-        <a href="<?= $base ?>/area-layanan" class="see-all-link">Lihat Semua Kota →</a>
+        <a href="<?= $base ?>/area-layanan" class="see-all-link">Lihat Semua Provinsi →</a>
+        <?php else: ?>
+        <div class="nav-panel-divider"></div>
+        <a href="<?= $base ?>/area-layanan" class="see-all-link">Lihat Semua Area →</a>
         <?php endif; ?>
+
       </div>
     </div>
 
-    <!-- Layanan 24 Jam -->
     <a href="<?= $base ?>/toko-bunga-online-24-jam-indonesia" class="nav-trigger">Layanan 24 Jam</a>
-
-    <!-- Galeri -->
     <a href="<?= $base ?>/galeri" class="nav-trigger">Galeri</a>
 
   </nav>
 
-  <!-- ── CTA Desktop + Hamburger ── -->
+  <!-- CTA + Hamburger -->
   <div class="flex items-center gap-3">
     <a href="<?= waLink() ?>" target="_blank" rel="noopener"
        class="hidden sm:flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors shadow-sm">
@@ -607,8 +576,6 @@ tailwind.config = {
       </svg>
       Pesan Sekarang
     </a>
-
-    <!-- Hamburger -->
     <button id="menuToggle" class="lg:hidden p-2 rounded-lg hover:bg-rose-50 transition-colors" aria-label="Buka menu">
       <span class="flex flex-col gap-1.5">
         <span class="ham-line"></span>
@@ -618,20 +585,18 @@ tailwind.config = {
     </button>
   </div>
 
-</div><!-- /.flex -->
-</div><!-- /.max-w -->
+</div>
+</div>
 </header>
 
 <!-- ══════════════════════════════════════════
      MOBILE DRAWER
 ══════════════════════════════════════════ -->
 <div id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Menu navigasi">
-
   <div id="drawerBackdrop"></div>
-
   <div id="drawerPanel">
 
-    <!-- Header drawer -->
+    <!-- Header -->
     <div class="drawer-header">
       <a href="<?= $base ?>/" class="flex items-center gap-2">
         <img src="<?= UPLOAD_URL . $logo ?>" alt="<?= clean($site_name) ?>"
@@ -645,11 +610,10 @@ tailwind.config = {
       </button>
     </div>
 
-    <!-- Body -->
     <div class="drawer-body">
 
       <!-- Beranda -->
-      <a href="<?= $base ?>/" class="dacc-l1-btn" style="font-weight:700;">
+      <a href="<?= $base ?>/" class="dacc-l1-btn">
         <span class="dacc-icon">
           <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
@@ -662,7 +626,7 @@ tailwind.config = {
       <div class="drawer-divider"></div>
       <div class="drawer-section-label">Menu Utama</div>
 
-      <!-- ── L1 Accordion: LAYANAN ── -->
+      <!-- ── L1: LAYANAN ── -->
       <button class="dacc-l1-btn" data-l1="layanan">
         <span class="dacc-icon">
           <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -680,7 +644,6 @@ tailwind.config = {
           $pid = 'l2-cat-' . $parent['id'];
         ?>
           <?php if (!empty($children)): ?>
-            <!-- L2 accordion: parent category -->
             <button class="dacc-l2-btn" data-l2="<?= $pid ?>">
               <?= clean($parent['name']) ?>
               <svg class="dacc-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -688,19 +651,20 @@ tailwind.config = {
               </svg>
             </button>
             <div class="dacc-l2-body" id="<?= $pid ?>">
-              <a href="<?= $base ?>/<?= $parent['slug'] ?>" class="dacc-l2-link">Semua <?= clean($parent['name']) ?></a>
+              <a href="<?= $base ?>/<?= $parent['slug'] ?>" class="dacc-l3-link" style="font-weight:600;color:#4b5563;">
+                Semua <?= clean($parent['name']) ?>
+              </a>
               <?php foreach ($children as $child): ?>
-              <a href="<?= $base ?>/<?= $child['slug'] ?>" class="dacc-l2-link"><?= clean($child['name']) ?></a>
+              <a href="<?= $base ?>/<?= $child['slug'] ?>" class="dacc-l3-link"><?= clean($child['name']) ?></a>
               <?php endforeach; ?>
             </div>
           <?php else: ?>
-            <!-- Parent tanpa children → direct link -->
             <a href="<?= $base ?>/<?= $parent['slug'] ?>" class="dacc-l1-link"><?= clean($parent['name']) ?></a>
           <?php endif; ?>
         <?php endforeach; ?>
       </div>
 
-      <!-- ── L1 Accordion: AREA LAYANAN ── -->
+      <!-- ── L1: AREA LAYANAN ── -->
       <button class="dacc-l1-btn" data-l1="area">
         <span class="dacc-icon">
           <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -714,36 +678,58 @@ tailwind.config = {
         </svg>
       </button>
       <div class="dacc-l1-body" id="l1-area">
-        <?php foreach ($navCities as $city):
-          $areas = $navAreas[$city['id']] ?? [];
-          $cid = 'l2-city-' . $city['id'];
+
+        <?php foreach ($navProvinces as $provName => $provCities):
+          $provKey = 'l2-prov-' . preg_replace('/[^a-z0-9]/', '-', strtolower($provName));
         ?>
-          <?php if (!empty($areas)): ?>
-            <!-- L2 accordion: kota dengan areas -->
-            <button class="dacc-l2-btn" data-l2="<?= $cid ?>">
-              <?= clean($city['name']) ?>
-              <svg class="dacc-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </button>
-            <div class="dacc-l2-body" id="<?= $cid ?>">
-              <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="dacc-l2-link">Semua Area <?= clean($city['name']) ?></a>
-              <?php foreach ($areas as $area): ?>
-              <a href="<?= $base ?>/toko-bunga-<?= $area['slug'] ?>" class="dacc-l2-link"><?= clean($area['name']) ?></a>
-              <?php endforeach; ?>
-            </div>
-          <?php else: ?>
-            <!-- Kota tanpa areas -->
-            <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="dacc-l1-link"><?= clean($city['name']) ?></a>
-          <?php endif; ?>
+          <!-- L2: Provinsi -->
+          <button class="dacc-l2-btn" data-l2="<?= $provKey ?>">
+            <?= clean($provName) ?>
+            <svg class="dacc-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="dacc-l2-body" id="<?= $provKey ?>">
+
+            <?php foreach ($provCities as $city):
+              $areas    = $navAreas[$city['id']] ?? [];
+              $cityKey  = 'l3-city-' . $city['id'];
+            ?>
+              <?php if (!empty($areas)): ?>
+                <!-- L3: Kota dengan area -->
+                <button class="dacc-l3-btn" data-l3="<?= $cityKey ?>">
+                  <?= clean($city['name']) ?>
+                  <svg class="dacc-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+                <div class="dacc-l3-body" id="<?= $cityKey ?>">
+                  <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="dacc-l3-link" style="font-weight:600;color:#6b7280;">
+                    Semua Area <?= clean($city['name']) ?>
+                  </a>
+                  <?php foreach ($areas as $area): ?>
+                  <a href="<?= $base ?>/toko-bunga-<?= $area['slug'] ?>" class="dacc-l3-link"><?= clean($area['name']) ?></a>
+                  <?php endforeach; ?>
+                </div>
+              <?php else: ?>
+                <!-- Kota tanpa area -->
+                <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="dacc-l3-link" style="font-weight:500;">
+                  <?= clean($city['name']) ?>
+                </a>
+              <?php endif; ?>
+            <?php endforeach; ?>
+
+          </div>
         <?php endforeach; ?>
-        <a href="<?= $base ?>/area-layanan" class="dacc-l1-link" style="color:#be185d;font-weight:700;">Lihat Semua Kota →</a>
+
+        <a href="<?= $base ?>/area-layanan" class="dacc-l1-link" style="color:#be185d;font-weight:700;">
+          Lihat Semua Area →
+        </a>
       </div>
 
       <div class="drawer-divider"></div>
       <div class="drawer-section-label">Lainnya</div>
 
-      <!-- Layanan 24 Jam -->
       <a href="<?= $base ?>/toko-bunga-online-24-jam-indonesia" class="dacc-l1-btn" style="font-weight:600;">
         <span class="dacc-icon">
           <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -754,7 +740,6 @@ tailwind.config = {
         </span>
       </a>
 
-      <!-- Galeri -->
       <a href="<?= $base ?>/galeri" class="dacc-l1-btn" style="font-weight:600;">
         <span class="dacc-icon">
           <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -766,9 +751,9 @@ tailwind.config = {
         </span>
       </a>
 
-    </div><!-- /.drawer-body -->
+    </div>
 
-    <!-- Footer: WA Button -->
+    <!-- Footer WA -->
     <div class="drawer-footer">
       <a href="<?= waLink() ?>" target="_blank" rel="noopener"
          class="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-semibold text-sm py-3 rounded-xl transition-colors shadow-sm">
@@ -780,8 +765,8 @@ tailwind.config = {
       </a>
     </div>
 
-  </div><!-- /#drawerPanel -->
-</div><!-- /#mobileDrawer -->
+  </div>
+</div>
 
 <!-- Breadcrumb -->
 <?php if (!empty($breadcrumbs)): ?>
@@ -806,116 +791,122 @@ tailwind.config = {
 (function () {
   'use strict';
 
-  /* ── Drawer open / close ───────────────────── */
-  const toggle   = document.getElementById('menuToggle');
-  const drawer   = document.getElementById('mobileDrawer');
-  const backdrop = document.getElementById('drawerBackdrop');
-  const closeBtn = document.getElementById('drawerClose');
+  /* ── Drawer ───────────────────────────────── */
+  var toggle   = document.getElementById('menuToggle');
+  var drawer   = document.getElementById('mobileDrawer');
+  var backdrop = document.getElementById('drawerBackdrop');
+  var closeBtn = document.getElementById('drawerClose');
 
-  function openDrawer() {
+  function openDrawer()  {
     drawer.classList.add('open');
     toggle.classList.add('is-open');
     document.body.style.overflow = 'hidden';
-    toggle.setAttribute('aria-label', 'Tutup menu');
+    toggle.setAttribute('aria-label','Tutup menu');
   }
   function closeDrawer() {
     drawer.classList.remove('open');
     toggle.classList.remove('is-open');
     document.body.style.overflow = '';
-    toggle.setAttribute('aria-label', 'Buka menu');
+    toggle.setAttribute('aria-label','Buka menu');
   }
-
-  toggle.addEventListener('click', function () {
+  toggle.addEventListener('click', function() {
     drawer.classList.contains('open') ? closeDrawer() : openDrawer();
   });
   backdrop.addEventListener('click', closeDrawer);
   closeBtn.addEventListener('click', closeDrawer);
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeDrawer();
-  });
+  document.addEventListener('keydown', function(e) { if (e.key==='Escape') closeDrawer(); });
 
-  /* ── Level-1 Accordion ─────────────────────── */
-  document.querySelectorAll('.dacc-l1-btn[data-l1]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var key    = btn.getAttribute('data-l1');
-      var body   = document.getElementById('l1-' + key);
+  /* ── Accordion helper ─────────────────────── */
+  function initAccordion(btnSelector, getBodyId, scopeSelector) {
+    document.querySelectorAll(btnSelector).forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var key    = btn.getAttribute(btnSelector.includes('l3') ? 'data-l3' : (btnSelector.includes('l2') ? 'data-l2' : 'data-l1'));
+        var body   = document.getElementById(key);
+        if (!body) return;
+        var isOpen = body.classList.contains('is-open');
+
+        // Tutup semua sibling di scope yang sama
+        var scope = scopeSelector ? btn.closest(scopeSelector) : document;
+        if (scope) {
+          scope.querySelectorAll('.' + getBodyId + '.is-open').forEach(function(el) { el.classList.remove('is-open'); });
+          scope.querySelectorAll('[data-' + (btnSelector.includes('l3') ? 'l3' : (btnSelector.includes('l2') ? 'l2' : 'l1')) + '].is-open').forEach(function(el) { el.classList.remove('is-open'); });
+        }
+
+        if (!isOpen) {
+          body.classList.add('is-open');
+          btn.classList.add('is-open');
+        }
+      });
+    });
+  }
+
+  // L1 — scope: seluruh drawer
+  document.querySelectorAll('.dacc-l1-btn[data-l1]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var key  = btn.getAttribute('data-l1');
+      var body = document.getElementById('l1-' + key);
       if (!body) return;
-
       var isOpen = body.classList.contains('is-open');
 
-      // Tutup semua L1
-      document.querySelectorAll('.dacc-l1-body.is-open').forEach(function (el) {
-        el.classList.remove('is-open');
-      });
-      document.querySelectorAll('.dacc-l1-btn.is-open').forEach(function (el) {
-        el.classList.remove('is-open');
-      });
-      // Tutup semua L2 juga
-      document.querySelectorAll('.dacc-l2-body.is-open').forEach(function (el) {
-        el.classList.remove('is-open');
-      });
-      document.querySelectorAll('.dacc-l2-btn.is-open').forEach(function (el) {
-        el.classList.remove('is-open');
-      });
+      // Tutup semua L1 + semua L2 + semua L3
+      document.querySelectorAll('.dacc-l1-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
+      document.querySelectorAll('.dacc-l1-btn.is-open').forEach(function(el){ el.classList.remove('is-open'); });
+      document.querySelectorAll('.dacc-l2-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
+      document.querySelectorAll('.dacc-l2-btn.is-open').forEach(function(el){ el.classList.remove('is-open'); });
+      document.querySelectorAll('.dacc-l3-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
+      document.querySelectorAll('.dacc-l3-btn.is-open').forEach(function(el){ el.classList.remove('is-open'); });
 
-      if (!isOpen) {
-        body.classList.add('is-open');
-        btn.classList.add('is-open');
-      }
+      if (!isOpen) { body.classList.add('is-open'); btn.classList.add('is-open'); }
     });
   });
 
-  /* ── Level-2 Accordion ─────────────────────── */
-  document.querySelectorAll('.dacc-l2-btn[data-l2]').forEach(function (btn) {
-    btn.addEventListener('click', function (e) {
-      e.stopPropagation(); // jangan trigger L1
-      var key    = btn.getAttribute('data-l2');
-      var body   = document.getElementById(key);
+  // L2 — scope: parent L1 body
+  document.querySelectorAll('.dacc-l2-btn[data-l2]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var key  = btn.getAttribute('data-l2');
+      var body = document.getElementById(key);
       if (!body) return;
-
       var isOpen = body.classList.contains('is-open');
 
-      // Tutup semua L2 dalam L1 yang sama
       var parentL1 = btn.closest('.dacc-l1-body');
       if (parentL1) {
-        parentL1.querySelectorAll('.dacc-l2-body.is-open').forEach(function (el) {
-          el.classList.remove('is-open');
-        });
-        parentL1.querySelectorAll('.dacc-l2-btn.is-open').forEach(function (el) {
-          el.classList.remove('is-open');
-        });
+        parentL1.querySelectorAll('.dacc-l2-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
+        parentL1.querySelectorAll('.dacc-l2-btn.is-open').forEach(function(el){ el.classList.remove('is-open'); });
+        // Tutup L3 di dalam L2 yang ditutup
+        parentL1.querySelectorAll('.dacc-l3-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
+        parentL1.querySelectorAll('.dacc-l3-btn.is-open').forEach(function(el){ el.classList.remove('is-open'); });
       }
-
-      if (!isOpen) {
-        body.classList.add('is-open');
-        btn.classList.add('is-open');
-      }
+      if (!isOpen) { body.classList.add('is-open'); btn.classList.add('is-open'); }
     });
   });
 
-  /* ── Desktop flyout: keyboard accessibility ─── */
-  document.querySelectorAll('.has-flyout[tabindex]').forEach(function (item) {
-    item.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        var flyout = item.querySelector('.nav-flyout');
-        if (!flyout) return;
-        var isVis = flyout.style.opacity === '1';
-        flyout.style.opacity = isVis ? '0' : '1';
-        flyout.style.visibility = isVis ? 'hidden' : 'visible';
+  // L3 — scope: parent L2 body
+  document.querySelectorAll('.dacc-l3-btn[data-l3]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var key  = btn.getAttribute('data-l3');
+      var body = document.getElementById(key);
+      if (!body) return;
+      var isOpen = body.classList.contains('is-open');
+
+      var parentL2 = btn.closest('.dacc-l2-body');
+      if (parentL2) {
+        parentL2.querySelectorAll('.dacc-l3-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
+        parentL2.querySelectorAll('.dacc-l3-btn.is-open').forEach(function(el){ el.classList.remove('is-open'); });
       }
+      if (!isOpen) { body.classList.add('is-open'); btn.classList.add('is-open'); }
     });
   });
 
-  /* ── Flyout overflow guard: flip to left if needed ── */
-  document.querySelectorAll('.nav-flyout').forEach(function (flyout) {
+  /* ── Desktop flyout overflow guard ───────── */
+  document.querySelectorAll('.nav-flyout').forEach(function(flyout) {
     var parent = flyout.closest('.has-flyout');
     if (!parent) return;
-    parent.addEventListener('mouseenter', function () {
-      // Reset
+    parent.addEventListener('mouseenter', function() {
       flyout.classList.remove('open-left');
-      // Check overflow after a tick
-      setTimeout(function () {
+      setTimeout(function() {
         var rect = flyout.getBoundingClientRect();
         if (rect.right > window.innerWidth - 16) {
           flyout.classList.add('open-left');
@@ -924,11 +915,21 @@ tailwind.config = {
     });
   });
 
+  /* ── Desktop flyout keyboard (Enter/Space) ── */
+  document.querySelectorAll('.has-flyout[tabindex]').forEach(function(item) {
+    item.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        var flyout = item.querySelector(':scope > .nav-flyout');
+        if (!flyout) return;
+        var visible = getComputedStyle(flyout).opacity === '1';
+        flyout.style.opacity   = visible ? '0' : '1';
+        flyout.style.visibility = visible ? 'hidden' : 'visible';
+        flyout.style.transform  = visible ? 'translateX(6px)' : 'translateX(0)';
+        flyout.style.pointerEvents = visible ? 'none' : 'auto';
+      }
+    });
+  });
+
 })();
 </script>
-</body>
-</html>
-<?php
-// NOTE: closing </body></html> ada di sini karena header.php meng-include footer.php terpisah.
-// Jika footer.php yang menutup tag, hapus dua baris di atas dan pindahkan ke footer.php.
-?>
