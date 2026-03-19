@@ -96,17 +96,20 @@ $mainCats    = getMainCategories();
 .cf-footer-city-links a:hover { color: rgba(192,72,90,.85); }
 .cf-footer-city-sep { color: rgba(160,100,90,.2); font-size: .6rem; line-height: 1; }
 
-/* Main grid — IDENTIK dengan aslinya */
+/* Main grid */
 .cf-footer-main {
   position: relative; z-index: 3;
   max-width: 1280px; margin: 0 auto;
   padding: 4rem 2rem 3rem;
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr;
-  gap: 3rem;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr;
+  gap: 2.5rem;
 }
-@media (max-width: 1024px) {
-  .cf-footer-main { grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+@media (max-width: 1200px) {
+  .cf-footer-main { grid-template-columns: 1.4fr 1fr 1fr; gap: 2rem; }
+}
+@media (max-width: 768px) {
+  .cf-footer-main { grid-template-columns: 1fr 1fr; gap: 2rem; }
 }
 @media (max-width: 600px) {
   .cf-footer-main { grid-template-columns: 1fr; gap: 2rem; padding: 3rem 1.5rem 2rem; }
@@ -173,7 +176,7 @@ $mainCats    = getMainCategories();
   50%      { box-shadow: 0 0 12px #4ade80, 0 0 20px rgba(74,222,128,.4); }
 }
 
-/* Nav columns — identik aslinya */
+/* Nav columns */
 .cf-footer-col-title {
   font-family: 'Cormorant Garamond', serif;
   font-size: .88rem; font-weight: 600;
@@ -202,151 +205,114 @@ $mainCats    = getMainCategories();
 .cf-footer-nav li a:hover { color: rgba(192,72,90,.85); gap: .6rem; }
 .cf-footer-nav li a:hover::before { color: rgba(192,72,90,.70); }
 
-/* ================================================================
-   SLIDER KOTA POPULER — styles
-   Kunci: min-width:0 pada kolom agar tidak melar merusak grid
-   ================================================================ */
-
-/* Kolom ke-4 harus min-width:0 supaya tidak melar keluar grid */
-.cf-kota-col {
-  min-width: 0;   /* <-- INI KUNCINYA, mencegah kolom melar */
-  width: 100%;
+/* ── Kolom Hubungi Kami ── */
+.cf-footer-contact-list {
+  list-style: none; padding: 0; margin: 0 0 1.4rem;
+  display: flex; flex-direction: column; gap: .65rem;
 }
+.cf-footer-contact-list li {
+  display: flex; align-items: flex-start; gap: .55rem;
+}
+.cf-footer-contact-icon {
+  font-size: .9rem; line-height: 1.5; flex-shrink: 0;
+}
+.cf-footer-contact-text {
+  font-size: .78rem; color: rgba(60,35,30,.48);
+  line-height: 1.55;
+}
+.cf-footer-contact-text a {
+  color: rgba(60,35,30,.48); text-decoration: none;
+  transition: color .2s;
+}
+.cf-footer-contact-text a:hover { color: rgba(192,72,90,.85); }
 
-/* Heading row dengan badge */
+.cf-footer-wa-btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  background: linear-gradient(135deg, #25d366, #1da851);
+  color: #fff; text-decoration: none;
+  font-size: .75rem; font-weight: 600; letter-spacing: .04em;
+  padding: .55rem 1.1rem; border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(18,140,80,.25);
+  transition: transform .2s, box-shadow .2s;
+}
+.cf-footer-wa-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(18,140,80,.35);
+}
+.cf-footer-wa-btn svg { flex-shrink: 0; }
+
+/* ── Slider Kota Populer ── */
+.cf-kota-col { min-width: 0; width: 100%; }
 .cf-kota-heading-row {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  margin-bottom: 1.2rem;
+  display: flex; align-items: center; gap: .5rem; margin-bottom: 1.2rem;
 }
-/* Reuse .cf-footer-col-title tapi tanpa margin-bottom */
-.cf-kota-heading-row .cf-footer-col-title {
-  margin-bottom: 0;
-  flex: 1;
-  min-width: 0;
-}
+.cf-kota-heading-row .cf-footer-col-title { margin-bottom: 0; flex: 1; min-width: 0; }
 .cf-kota-badge {
   font-size: .62rem; font-weight: 600;
   letter-spacing: .1em; text-transform: uppercase;
-  background: rgba(192,72,90,.07);
-  color: rgba(192,72,90,.60);
-  border: 1px solid rgba(192,72,90,.18);
-  border-radius: 999px;
-  padding: 2px 9px;
-  white-space: nowrap;
-  flex-shrink: 0;
+  background: rgba(192,72,90,.07); color: rgba(192,72,90,.60);
+  border: 1px solid rgba(192,72,90,.18); border-radius: 999px;
+  padding: 2px 9px; white-space: nowrap; flex-shrink: 0;
 }
-
-/* Viewport — overflow hidden, lebar 100% kolom */
-.cf-kota-viewport {
-  width: 100%;
-  overflow: hidden;
-}
-
-/* Track — flex row, geser translateX */
+.cf-kota-viewport { width: 100%; overflow: hidden; }
 .cf-kota-track {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
+  display: flex; flex-direction: row; width: 100%;
   transition: transform .38s cubic-bezier(.4,0,.2,1);
   will-change: transform;
 }
-
-/* Slide — kolom flex menurun, min-width 100% */
 .cf-kota-slide {
-  min-width: 100%;
-  width: 100%;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: .45rem;
-  box-sizing: border-box;
+  min-width: 100%; width: 100%; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: .45rem; box-sizing: border-box;
 }
-
-/* Data source hidden — SEO tetap aman */
 .cf-kota-item { display: none !important; }
-
-/* Link kota — sama persis style .cf-footer-nav li a */
 .cf-kota-link {
-  font-size: .78rem;
-  color: rgba(60,35,30,.45);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  padding: 4px 6px;
-  border-radius: 5px;
-  border: 1px solid transparent;
+  font-size: .78rem; color: rgba(60,35,30,.45);
+  text-decoration: none; display: inline-flex; align-items: center; gap: .4rem;
+  padding: 4px 6px; border-radius: 5px; border: 1px solid transparent;
   transition: color .2s, gap .2s, background .18s, border-color .18s;
-  width: 100%;
-  box-sizing: border-box;
+  width: 100%; box-sizing: border-box;
 }
 .cf-kota-link::before {
   content: '✦'; font-size: .5rem;
-  color: rgba(192,72,90,.30);
-  transition: color .2s; flex-shrink: 0;
+  color: rgba(192,72,90,.30); transition: color .2s; flex-shrink: 0;
 }
 .cf-kota-link:hover {
-  color: rgba(192,72,90,.85);
-  gap: .6rem;
-  background: rgba(192,72,90,.04);
-  border-color: rgba(192,72,90,.12);
+  color: rgba(192,72,90,.85); gap: .6rem;
+  background: rgba(192,72,90,.04); border-color: rgba(192,72,90,.12);
 }
 .cf-kota-link:hover::before { color: rgba(192,72,90,.65); }
-.cf-kota-link-name {
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-/* Baris kontrol */
+.cf-kota-link-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cf-kota-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: .8rem;
+  display: flex; align-items: center; justify-content: space-between; margin-top: .8rem;
 }
 .cf-kota-dots { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
 .cf-kota-dot-btn {
-  width: 5px; height: 5px; min-width: 5px;
-  border-radius: 3px;
-  background: rgba(192,72,90,.2);
-  cursor: pointer;
-  transition: background .2s, width .25s;
-  border: none; padding: 0;
+  width: 5px; height: 5px; min-width: 5px; border-radius: 3px;
+  background: rgba(192,72,90,.2); cursor: pointer;
+  transition: background .2s, width .25s; border: none; padding: 0;
 }
-.cf-kota-dot-btn.active {
-  width: 16px;
-  background: rgba(192,72,90,.60);
-}
+.cf-kota-dot-btn.active { width: 16px; background: rgba(192,72,90,.60); }
 .cf-kota-nav { display: flex; align-items: center; gap: 5px; }
 .cf-kota-lbl {
   font-size: .62rem; letter-spacing: .08em;
-  color: rgba(60,35,30,.28);
-  min-width: 26px; text-align: center;
+  color: rgba(60,35,30,.28); min-width: 26px; text-align: center;
 }
 .cf-kota-btn {
   width: 24px; height: 24px; border-radius: 6px;
   border: 1px solid rgba(192,72,90,.18);
-  background: rgba(255,255,255,.65);
-  backdrop-filter: blur(6px);
-  color: rgba(192,72,90,.55);
-  cursor: pointer;
+  background: rgba(255,255,255,.65); backdrop-filter: blur(6px);
+  color: rgba(192,72,90,.55); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background .18s, border-color .18s, color .18s;
   padding: 0; flex-shrink: 0;
 }
 .cf-kota-btn:hover {
-  background: rgba(192,72,90,.08);
-  border-color: rgba(192,72,90,.35);
-  color: rgba(192,72,90,.9);
+  background: rgba(192,72,90,.08); border-color: rgba(192,72,90,.35); color: rgba(192,72,90,.9);
 }
 .cf-kota-btn:disabled { opacity: .25; cursor: default; }
-
 .cf-kota-hint {
-  display: none;
-  font-size: .6rem; letter-spacing: .06em;
-  color: rgba(60,35,30,.25);
-  text-align: center; margin-top: 6px;
+  display: none; font-size: .6rem; letter-spacing: .06em;
+  color: rgba(60,35,30,.25); text-align: center; margin-top: 6px;
 }
 @media (max-width: 767px) {
   .cf-kota-btn  { width: 30px; height: 30px; border-radius: 8px; }
@@ -512,7 +478,6 @@ $mainCats    = getMainCategories();
     </div>
 
     <!-- Kolom 4: Kota Populer — SLIDER -->
-    <!-- min-width:0 wajib agar kolom tidak melar keluar grid -->
     <div class="cf-kota-col">
 
       <div class="cf-kota-heading-row">
@@ -544,6 +509,42 @@ $mainCats    = getMainCategories();
       </div>
       <p class="cf-kota-hint">Geser untuk lihat kota lainnya</p>
 
+    </div>
+
+    <!-- Kolom 5: Hubungi Kami -->
+    <div>
+      <div class="cf-footer-col-title">Hubungi Kami</div>
+      <ul class="cf-footer-contact-list">
+        <li>
+          <span class="cf-footer-contact-icon">📍</span>
+          <span class="cf-footer-contact-text"><?= clean(getSetting('address', 'Jl. Toko Bunga No. 1, Indonesia')) ?></span>
+        </li>
+        <li>
+          <span class="cf-footer-contact-icon">📞</span>
+          <span class="cf-footer-contact-text">
+            <a href="tel:<?= getSetting('whatsapp_number', '') ?>"><?= clean(getSetting('phone_display', getSetting('whatsapp_number', '-'))) ?></a>
+          </span>
+        </li>
+        <li>
+          <span class="cf-footer-contact-icon">✉️</span>
+          <span class="cf-footer-contact-text">
+            <a href="mailto:<?= clean(getSetting('email', '')) ?>"><?= clean(getSetting('email', '-')) ?></a>
+          </span>
+        </li>
+        <li>
+          <span class="cf-footer-contact-icon">⏰</span>
+          <span class="cf-footer-contact-text"><?= clean(getSetting('jam_buka', 'Buka 24 Jam Nonstop')) ?></span>
+        </li>
+      </ul>
+      <a href="<?= waLink('Halo Chika Florist, saya ingin memesan bunga') ?>"
+         target="_blank" rel="noopener"
+         class="cf-footer-wa-btn">
+        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.096.541 4.063 1.491 5.776L.057 23.04l5.43-1.424A11.947 11.947 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.015-1.371l-.36-.214-3.726.977.995-3.633-.235-.374A9.818 9.818 0 1112 21.818z"/>
+        </svg>
+        Chat WhatsApp
+      </a>
     </div>
 
   </div><!-- /.cf-footer-main -->
