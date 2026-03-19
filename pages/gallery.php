@@ -320,26 +320,6 @@ $galleryItems = $items; // semua untuk masonry
 }
 .gal-overlay-btn:hover { background: #15803d; }
 
-/* Category badge */
-.gal-cat-badge {
-  position: absolute;
-  top: .6rem;
-  left: .6rem;
-  font-family: 'Jost', sans-serif;
-  font-size: .62rem;
-  font-weight: 700;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  color: #fff;
-  background: rgba(225,29,72,.75);
-  backdrop-filter: blur(6px);
-  padding: .22rem .65rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.2);
-  z-index: 2;
-  pointer-events: none;
-}
-
 /* Zoom icon on hover */
 .gal-zoom-icon {
   position: absolute;
@@ -622,10 +602,7 @@ $galleryItems = $items; // semua untuk masonry
          data-wa="<?= $waLink ?>"
          onclick="openLightbox(<?= $idx ?>)">
 
-      <!-- Category badge -->
-      <?php if (!empty($item['category'])): ?>
-      <span class="gal-cat-badge"><?= clean($item['category']) ?></span>
-      <?php endif; ?>
+    
 
       <!-- Zoom icon -->
       <div class="gal-zoom-icon">
