@@ -4,20 +4,24 @@ requireAdminLogin();
 $current_page = basename($_SERVER['PHP_SELF'], '.php');
 $admin_name   = $_SESSION['admin_name'] ?? 'Admin';
 $admin_title  = $admin_title ?? 'Admin Panel';
-$logo           = getSetting('logo', 'logo.jpeg');
+$logo         = getSetting('logo', 'logo.jpeg');
 
 $nav_items = [
-    ['href'=> BASE_URL . '/admin/dashboard', 'label'=>'Dashboard',  'icon'=>'🏠', 'page'=>'dashboard'],
-    ['href'=> BASE_URL . '/admin/produk',    'label'=>'Produk',     'icon'=>'🌺', 'page'=>'produk'],
-    ['href'=> BASE_URL . '/admin/kategori',  'label'=>'Kategori',   'icon'=>'📁', 'page'=>'kategori'],
-    ['href'=> BASE_URL . '/admin/kota',      'label'=>'Kota',       'icon'=>'🏙️', 'page'=>'kota'],
-    ['href'=> BASE_URL . '/admin/area',      'label'=>'Area',       'icon'=>'📍', 'page'=>'area'],
-    ['href'=> BASE_URL . '/admin/layanan',   'label'=>'Layanan',    'icon'=>'⚡', 'page'=>'layanan'],
-    ['href'=> BASE_URL . '/admin/testimoni', 'label'=>'Testimoni',  'icon'=>'💬', 'page'=>'testimoni'],
-    ['href'=> BASE_URL . '/admin/galeri',    'label'=>'Galeri',     'icon'=>'🖼️', 'page'=>'galeri'],
-    ['href'=> BASE_URL . '/admin/faq',       'label'=>'FAQ',        'icon'=>'❓', 'page'=>'faq'],
-    ['href'=> BASE_URL . '/admin/pengaturan','label'=>'Pengaturan', 'icon'=>'⚙️', 'page'=>'pengaturan'],
-    ['href'=> BASE_URL . '/admin/akun', 'label'=>'Akun', 'icon'=>'👤', 'page'=>'akun'],
+    ['href'=> BASE_URL . '/admin/dashboard',       'label'=>'Dashboard',        'icon'=>'🏠', 'page'=>'dashboard'],
+    ['href'=> BASE_URL . '/admin/produk',           'label'=>'Produk',           'icon'=>'🌺', 'page'=>'produk'],
+    ['href'=> BASE_URL . '/admin/kategori',         'label'=>'Kategori',         'icon'=>'📁', 'page'=>'kategori'],
+    ['href'=> BASE_URL . '/admin/kota',             'label'=>'Kota',             'icon'=>'🏙️', 'page'=>'kota'],
+    ['href'=> BASE_URL . '/admin/area',             'label'=>'Area',             'icon'=>'📍', 'page'=>'area'],
+    ['href'=> BASE_URL . '/admin/layanan',          'label'=>'Layanan',          'icon'=>'⚡', 'page'=>'layanan'],
+    ['href'=> BASE_URL . '/admin/testimoni',        'label'=>'Testimoni',        'icon'=>'💬', 'page'=>'testimoni'],
+    ['href'=> BASE_URL . '/admin/galeri',           'label'=>'Galeri',           'icon'=>'🖼️', 'page'=>'galeri'],
+    ['href'=> BASE_URL . '/admin/faq',              'label'=>'FAQ',              'icon'=>'❓', 'page'=>'faq'],
+    // ── Blog ─────────────────────────────────────────────────
+    ['href'=> BASE_URL . '/admin/blog',             'label'=>'Blog',             'icon'=>'📝', 'page'=>'blog'],
+    ['href'=> BASE_URL . '/admin/blog-categories',  'label'=>'Kategori Blog',    'icon'=>'📂', 'page'=>'blog-categories'],
+    // ─────────────────────────────────────────────────────────
+    ['href'=> BASE_URL . '/admin/pengaturan',       'label'=>'Pengaturan',       'icon'=>'⚙️', 'page'=>'pengaturan'],
+    ['href'=> BASE_URL . '/admin/akun',             'label'=>'Akun',             'icon'=>'👤', 'page'=>'akun'],
 ];
 ?>
 <!DOCTYPE html>
@@ -40,6 +44,7 @@ body{font-family:'Lato',sans-serif}
 .admin-table tr:hover td{background:#fff8f8}
 .badge-active{background:#dcfce7;color:#15803d;font-size:.7rem;padding:.15rem .6rem;border-radius:9999px;font-weight:600;display:inline-block}
 .badge-inactive{background:#fef2f2;color:#dc2626;font-size:.7rem;padding:.15rem .6rem;border-radius:9999px;font-weight:600;display:inline-block}
+.badge-draft{background:#fef9c3;color:#854d0e;font-size:.7rem;padding:.15rem .6rem;border-radius:9999px;font-weight:600;display:inline-block}
 .form-input{width:100%;padding:.55rem .85rem;border:1.5px solid #fecdd3;border-radius:.5rem;font-size:.875rem;color:#374151;outline:none;transition:border-color .15s}
 .form-input:focus{border-color:#e11d48;box-shadow:0 0 0 3px rgba(225,29,72,.08)}
 .form-label{display:block;font-size:.85rem;font-weight:600;color:#374151;margin-bottom:.35rem}
@@ -92,14 +97,14 @@ body{font-family:'Lato',sans-serif}
 
   <?php if (!empty($_SESSION['success'])): ?>
   <div class="mx-6 mt-4 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg px-4 py-3 flex justify-between">
-    <span><?= clean($_SESSION['success']) ?></span>
+    <span>✅ <?= clean($_SESSION['success']) ?></span>
     <button onclick="this.parentElement.remove()">✕</button>
   </div>
   <?php unset($_SESSION['success']); endif; ?>
 
   <?php if (!empty($_SESSION['error'])): ?>
   <div class="mx-6 mt-4 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3 flex justify-between">
-    <span><?= clean($_SESSION['error']) ?></span>
+    <span>⚠️ <?= clean($_SESSION['error']) ?></span>
     <button onclick="this.parentElement.remove()">✕</button>
   </div>
   <?php unset($_SESSION['error']); endif; ?>

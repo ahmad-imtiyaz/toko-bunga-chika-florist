@@ -9,16 +9,21 @@ $canonical      = $canonical_url ?? currentUrl();
 $logo           = getSetting('logo', 'logo.jpeg');
 $base           = BASE_URL;
 
-// ── Data Navbar ──────────────────────────────────────────────
+// ── Deteksi slug aktif ───────────────────────────────────
+$uriPath     = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$basePath    = parse_url(BASE_URL, PHP_URL_PATH);
+if ($basePath && strpos($uriPath, $basePath) === 0) {
+    $uriPath = substr($uriPath, strlen($basePath));
+}
+$current_slug = strtolower(trim($uriPath, '/'));
 
-// LAYANAN: parent categories + children
+// ── Data Navbar ──────────────────────────────────────────
 $navParentCats  = getMainCategories();
 $navCatChildren = [];
 foreach ($navParentCats as $parent) {
     $navCatChildren[$parent['id']] = getSubCategories($parent['id']);
 }
 
-// AREA LAYANAN: query langsung agar pasti include kolom province & tier
 $allCities = getDB()->query(
     "SELECT id, name, slug, province, tier
      FROM cities
@@ -26,22 +31,18 @@ $allCities = getDB()->query(
      ORDER BY province ASC, tier ASC, sort_order ASC, name ASC"
 )->fetchAll();
 
-// Preload areas per city
 $navAreas = [];
 foreach ($allCities as $city) {
     $navAreas[$city['id']] = getAreasByCity($city['id']);
 }
 
-// Group by province → ['Banten'=>[...], 'DKI Jakarta'=>[...], 'Jawa Barat'=>[...]]
 $navProvinces = [];
 foreach ($allCities as $city) {
     $prov = trim((string)($city['province'] ?? ''));
     if ($prov === '') $prov = 'Lainnya';
     $navProvinces[$prov][] = $city;
 }
-ksort($navProvinces); // A-Z
-
-// Tampilkan semua provinsi di desktop (tidak dibatasi)
+ksort($navProvinces);
 $navProvincesDisplay = $navProvinces;
 ?>
 <!DOCTYPE html>
@@ -77,11 +78,10 @@ tailwind.config = {
 
 <style>
 /* ════════════════════════════════════════════════
-   DESKTOP FLYOUT — shared base
+   DESKTOP FLYOUT
    ════════════════════════════════════════════════ */
 .nav-dropdown { position: relative; }
 
-/* L1 panel (muncul dari navbar) */
 .nav-panel {
   position: absolute;
   top: calc(100% + 8px);
@@ -106,7 +106,6 @@ tailwind.config = {
   pointer-events: auto;
 }
 
-/* Item di dalam panel (bisa jadi parent flyout L2/L3) */
 .nav-panel-item {
   display: flex;
   align-items: center;
@@ -135,7 +134,6 @@ tailwind.config = {
 }
 .nav-panel-item:hover .chev-r { color: #be185d; }
 
-/* Flyout generic (L2 dan L3 pakai class ini) */
 .nav-flyout {
   position: absolute;
   top: -6px;
@@ -154,7 +152,6 @@ tailwind.config = {
   z-index: 201;
   pointer-events: none;
 }
-/* bridge gap */
 .nav-flyout::before {
   content: '';
   position: absolute;
@@ -167,13 +164,8 @@ tailwind.config = {
   transform: translateX(0);
   pointer-events: auto;
 }
+.nav-flyout .nav-flyout { z-index: 202; }
 
-/* L3 flyout (lebih dalam, z-index lebih tinggi) */
-.nav-flyout .nav-flyout {
-  z-index: 202;
-}
-
-/* open-left: flyout buka ke kiri kalau overflow */
 .nav-flyout.open-left {
   left: auto; right: 100%;
   transform: translateX(-6px);
@@ -183,7 +175,6 @@ tailwind.config = {
   transform: translateX(0);
 }
 
-/* Item di dalam flyout (leaf link) */
 .nav-flyout-item {
   display: flex;
   align-items: center;
@@ -204,10 +195,8 @@ tailwind.config = {
 }
 .nav-flyout-item:hover { background: #fdf2f8; color: #be185d; }
 
-/* Divider */
 .nav-panel-divider { height: 1px; background: #fce7f3; margin: 4px 0; }
 
-/* "Lihat semua" link di bawah panel */
 .see-all-link {
   display: flex;
   align-items: center;
@@ -222,7 +211,6 @@ tailwind.config = {
 }
 .see-all-link:hover { background: #fdf2f8; }
 
-/* Nav trigger button */
 .nav-trigger {
   display: flex;
   align-items: center;
@@ -238,6 +226,8 @@ tailwind.config = {
   text-decoration: none;
 }
 .nav-trigger:hover, .nav-dropdown:hover .nav-trigger { color: #be185d; }
+/* Active state untuk nav link */
+.nav-trigger.active { color: #be185d; }
 .nav-trigger svg { width: 12px; height: 12px; transition: transform .2s ease; }
 .nav-dropdown:hover .nav-trigger svg { transform: rotate(180deg); }
 
@@ -281,7 +271,6 @@ tailwind.config = {
   padding-bottom: 1.5rem;
 }
 
-/* ── L1 (Beranda, Layanan, Area Layanan, dll) ── */
 .dacc-l1-btn {
   display: flex; align-items: center; justify-content: space-between;
   width: 100%; padding: 0.78rem 1.25rem;
@@ -294,6 +283,8 @@ tailwind.config = {
 }
 .dacc-l1-btn:hover { background: #fdf2f8; color: #be185d; }
 .dacc-l1-btn.is-open { color: #be185d; }
+/* Active state untuk mobile link */
+.dacc-l1-btn.active { color: #be185d; font-weight: 700; }
 .dacc-l1-btn .dacc-icon { display: flex; align-items: center; gap: 8px; }
 .dacc-l1-btn .dacc-chevron {
   width: 15px; height: 15px; color: #9ca3af;
@@ -308,7 +299,6 @@ tailwind.config = {
 }
 .dacc-l1-body.is-open { max-height: 3000px; }
 
-/* Link langsung di dalam L1 (tanpa sub) */
 .dacc-l1-link {
   display: flex; align-items: center; gap: 8px;
   padding: 0.65rem 1.25rem 0.65rem 2.25rem;
@@ -322,7 +312,6 @@ tailwind.config = {
 }
 .dacc-l1-link:hover { background: #fce7f3; color: #be185d; }
 
-/* ── L2 (parent category / PROVINSI) ── */
 .dacc-l2-btn {
   display: flex; align-items: center; justify-content: space-between;
   width: 100%;
@@ -352,7 +341,6 @@ tailwind.config = {
 }
 .dacc-l2-body.is-open { max-height: 2000px; }
 
-/* ── L3 (KOTA — bisa expand ke area) ── */
 .dacc-l3-btn {
   display: flex; align-items: center; justify-content: space-between;
   width: 100%;
@@ -382,7 +370,6 @@ tailwind.config = {
 }
 .dacc-l3-body.is-open { max-height: 1000px; }
 
-/* ── L3 leaf link (area) ── */
 .dacc-l3-link {
   display: flex; align-items: center; gap: 6px;
   padding: 0.45rem 0.75rem 0.45rem 1.25rem;
@@ -396,7 +383,6 @@ tailwind.config = {
 }
 .dacc-l3-link:hover { background: #fce7f3; color: #be185d; }
 
-/* Dividers & labels */
 .drawer-divider { height: 1px; background: #f3f4f6; margin: 0.35rem 1.25rem; }
 .drawer-section-label {
   padding: 0.75rem 1.25rem 0.25rem;
@@ -410,7 +396,6 @@ tailwind.config = {
   flex-shrink: 0;
 }
 
-/* Hamburger → X */
 .ham-line {
   display: block; width: 20px; height: 2px;
   background: #374151; border-radius: 2px;
@@ -450,11 +435,12 @@ tailwind.config = {
   <!-- Desktop Nav -->
   <nav class="hidden lg:flex items-center gap-7 text-sm" aria-label="Navigasi utama">
 
-    <a href="<?= $base ?>/" class="nav-trigger">Beranda</a>
+    <a href="<?= $base ?>/"
+       class="nav-trigger <?= $current_slug === '' ? 'active' : '' ?>">Beranda</a>
 
-    <!-- ── LAYANAN: L1 panel → L2 flyout ── -->
+    <!-- ── PRODUK ── -->
     <div class="nav-dropdown">
-      <button class="nav-trigger" aria-haspopup="true">
+      <button class="nav-trigger <?= strpos($current_slug, 'produk') === 0 ? 'active' : '' ?>" aria-haspopup="true">
         Product
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
@@ -491,38 +477,31 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- ── AREA LAYANAN: L1 panel (provinsi) → L2 flyout (kota) → L3 flyout (area) ── -->
+    <!-- ── AREA LAYANAN ── -->
     <div class="nav-dropdown">
-      <button class="nav-trigger" aria-haspopup="true">
+      <button class="nav-trigger <?= strpos($current_slug, 'toko-bunga-') === 0 || $current_slug === 'area-layanan' ? 'active' : '' ?>" aria-haspopup="true">
         Area Layanan
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
         </svg>
       </button>
       <div class="nav-panel" role="menu">
-
         <?php foreach ($navProvincesDisplay as $provName => $provCities): ?>
-          <!-- L1 item: Provinsi → flyout L2 berisi kota-kota -->
           <div class="has-flyout nav-panel-item" role="none" tabindex="0">
             <span><?= clean($provName) ?></span>
             <svg class="chev-r" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
             </svg>
-
-            <!-- L2 flyout: Kota-kota dalam provinsi ini -->
             <div class="nav-flyout" role="menu">
               <?php foreach ($provCities as $city):
                 $areas = $navAreas[$city['id']] ?? [];
               ?>
                 <?php if (!empty($areas)): ?>
-                  <!-- Kota punya area → flyout L3 -->
                   <div class="has-flyout nav-panel-item" role="none" tabindex="0" style="font-weight:500;">
                     <span><?= clean($city['name']) ?></span>
                     <svg class="chev-r" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
                     </svg>
-
-                    <!-- L3 flyout: Area dalam kota ini -->
                     <div class="nav-flyout" role="menu">
                       <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="nav-flyout-item" role="menuitem">
                         Semua Area <?= clean($city['name']) ?>
@@ -535,34 +514,29 @@ tailwind.config = {
                       <?php endforeach; ?>
                     </div>
                   </div>
-
                 <?php else: ?>
-                  <!-- Kota tanpa area → direct link -->
                   <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="nav-flyout-item" role="menuitem">
                     <?= clean($city['name']) ?>
                   </a>
                 <?php endif; ?>
               <?php endforeach; ?>
             </div>
-            <!-- /L2 flyout -->
-
           </div>
-          <!-- /L1 item provinsi -->
         <?php endforeach; ?>
-
-        <?php if (count($navProvinces) > count($navProvincesDisplay)): ?>
-        <div class="nav-panel-divider"></div>
-        <a href="<?= $base ?>/area-layanan" class="see-all-link">Lihat Semua Provinsi →</a>
-        <?php else: ?>
         <div class="nav-panel-divider"></div>
         <a href="<?= $base ?>/area-layanan" class="see-all-link">Lihat Semua Area →</a>
-        <?php endif; ?>
-
       </div>
     </div>
 
-    <a href="<?= $base ?>/toko-bunga-online-24-jam-indonesia" class="nav-trigger">Layanan 24 Jam</a>
-    <a href="<?= $base ?>/galeri" class="nav-trigger">Galeri</a>
+    <a href="<?= $base ?>/toko-bunga-online-24-jam-indonesia"
+       class="nav-trigger <?= $current_slug === 'toko-bunga-online-24-jam-indonesia' ? 'active' : '' ?>">Layanan 24 Jam</a>
+
+    <a href="<?= $base ?>/galeri"
+       class="nav-trigger <?= $current_slug === 'galeri' ? 'active' : '' ?>">Galeri</a>
+
+    <!-- ── BLOG ── -->
+    <a href="<?= $base ?>/blog"
+       class="nav-trigger <?= $current_slug === 'blog' || strpos($current_slug, 'blog/') === 0 ? 'active' : '' ?>">Blog</a>
 
   </nav>
 
@@ -596,7 +570,6 @@ tailwind.config = {
   <div id="drawerBackdrop"></div>
   <div id="drawerPanel">
 
-    <!-- Header -->
     <div class="drawer-header">
       <a href="<?= $base ?>/" class="flex items-center gap-2">
         <img src="<?= UPLOAD_URL . $logo ?>" alt="<?= clean($site_name) ?>"
@@ -613,7 +586,7 @@ tailwind.config = {
     <div class="drawer-body">
 
       <!-- Beranda -->
-      <a href="<?= $base ?>/" class="dacc-l1-btn">
+      <a href="<?= $base ?>/" class="dacc-l1-btn <?= $current_slug === '' ? 'active' : '' ?>">
         <span class="dacc-icon">
           <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
@@ -626,7 +599,7 @@ tailwind.config = {
       <div class="drawer-divider"></div>
       <div class="drawer-section-label">Menu Utama</div>
 
-      <!-- ── L1: LAYANAN ── -->
+      <!-- ── L1: PRODUK ── -->
       <button class="dacc-l1-btn" data-l1="layanan">
         <span class="dacc-icon">
           <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -678,11 +651,9 @@ tailwind.config = {
         </svg>
       </button>
       <div class="dacc-l1-body" id="l1-area">
-
         <?php foreach ($navProvinces as $provName => $provCities):
           $provKey = 'l2-prov-' . preg_replace('/[^a-z0-9]/', '-', strtolower($provName));
         ?>
-          <!-- L2: Provinsi -->
           <button class="dacc-l2-btn" data-l2="<?= $provKey ?>">
             <?= clean($provName) ?>
             <svg class="dacc-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -690,13 +661,11 @@ tailwind.config = {
             </svg>
           </button>
           <div class="dacc-l2-body" id="<?= $provKey ?>">
-
             <?php foreach ($provCities as $city):
-              $areas    = $navAreas[$city['id']] ?? [];
-              $cityKey  = 'l3-city-' . $city['id'];
+              $areas   = $navAreas[$city['id']] ?? [];
+              $cityKey = 'l3-city-' . $city['id'];
             ?>
               <?php if (!empty($areas)): ?>
-                <!-- L3: Kota dengan area -->
                 <button class="dacc-l3-btn" data-l3="<?= $cityKey ?>">
                   <?= clean($city['name']) ?>
                   <svg class="dacc-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -712,16 +681,13 @@ tailwind.config = {
                   <?php endforeach; ?>
                 </div>
               <?php else: ?>
-                <!-- Kota tanpa area -->
                 <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="dacc-l3-link" style="font-weight:500;">
                   <?= clean($city['name']) ?>
                 </a>
               <?php endif; ?>
             <?php endforeach; ?>
-
           </div>
         <?php endforeach; ?>
-
         <a href="<?= $base ?>/area-layanan" class="dacc-l1-link" style="color:#be185d;font-weight:700;">
           Lihat Semua Area →
         </a>
@@ -730,7 +696,9 @@ tailwind.config = {
       <div class="drawer-divider"></div>
       <div class="drawer-section-label">Lainnya</div>
 
-      <a href="<?= $base ?>/toko-bunga-online-24-jam-indonesia" class="dacc-l1-btn" style="font-weight:600;">
+      <a href="<?= $base ?>/toko-bunga-online-24-jam-indonesia"
+         class="dacc-l1-btn <?= $current_slug === 'toko-bunga-online-24-jam-indonesia' ? 'active' : '' ?>"
+         style="font-weight:600;">
         <span class="dacc-icon">
           <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
@@ -740,7 +708,9 @@ tailwind.config = {
         </span>
       </a>
 
-      <a href="<?= $base ?>/galeri" class="dacc-l1-btn" style="font-weight:600;">
+      <a href="<?= $base ?>/galeri"
+         class="dacc-l1-btn <?= $current_slug === 'galeri' ? 'active' : '' ?>"
+         style="font-weight:600;">
         <span class="dacc-icon">
           <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <rect x="3" y="3" width="18" height="18" rx="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
@@ -751,9 +721,23 @@ tailwind.config = {
         </span>
       </a>
 
-    </div>
+      <!-- ── BLOG ── -->
+      <a href="<?= $base ?>/blog"
+         class="dacc-l1-btn <?= $current_slug === 'blog' || strpos($current_slug, 'blog/') === 0 ? 'active' : '' ?>"
+         style="font-weight:600;">
+        <span class="dacc-icon">
+          <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v10a2 2 0 01-2 2z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 4v6h6M9 14h6M9 17h4"/>
+          </svg>
+          Blog
+        </span>
+      </a>
 
-    <!-- Footer WA -->
+    </div><!-- /drawer-body -->
+
     <div class="drawer-footer">
       <a href="<?= waLink() ?>" target="_blank" rel="noopener"
          class="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-semibold text-sm py-3 rounded-xl transition-colors shadow-sm">
@@ -784,14 +768,11 @@ tailwind.config = {
 </nav>
 <?php endif; ?>
 
-<!-- ══════════════════════════════════════════
-     JAVASCRIPT
-══════════════════════════════════════════ -->
 <script>
 (function () {
   'use strict';
 
-  /* ── Drawer ───────────────────────────────── */
+  /* ── Drawer ─────────────────────────────── */
   var toggle   = document.getElementById('menuToggle');
   var drawer   = document.getElementById('mobileDrawer');
   var backdrop = document.getElementById('drawerBackdrop');
@@ -816,32 +797,7 @@ tailwind.config = {
   closeBtn.addEventListener('click', closeDrawer);
   document.addEventListener('keydown', function(e) { if (e.key==='Escape') closeDrawer(); });
 
-  /* ── Accordion helper ─────────────────────── */
-  function initAccordion(btnSelector, getBodyId, scopeSelector) {
-    document.querySelectorAll(btnSelector).forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        var key    = btn.getAttribute(btnSelector.includes('l3') ? 'data-l3' : (btnSelector.includes('l2') ? 'data-l2' : 'data-l1'));
-        var body   = document.getElementById(key);
-        if (!body) return;
-        var isOpen = body.classList.contains('is-open');
-
-        // Tutup semua sibling di scope yang sama
-        var scope = scopeSelector ? btn.closest(scopeSelector) : document;
-        if (scope) {
-          scope.querySelectorAll('.' + getBodyId + '.is-open').forEach(function(el) { el.classList.remove('is-open'); });
-          scope.querySelectorAll('[data-' + (btnSelector.includes('l3') ? 'l3' : (btnSelector.includes('l2') ? 'l2' : 'l1')) + '].is-open').forEach(function(el) { el.classList.remove('is-open'); });
-        }
-
-        if (!isOpen) {
-          body.classList.add('is-open');
-          btn.classList.add('is-open');
-        }
-      });
-    });
-  }
-
-  // L1 — scope: seluruh drawer
+  /* ── Accordion L1 ─────────────────────── */
   document.querySelectorAll('.dacc-l1-btn[data-l1]').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var key  = btn.getAttribute('data-l1');
@@ -849,7 +805,6 @@ tailwind.config = {
       if (!body) return;
       var isOpen = body.classList.contains('is-open');
 
-      // Tutup semua L1 + semua L2 + semua L3
       document.querySelectorAll('.dacc-l1-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
       document.querySelectorAll('.dacc-l1-btn.is-open').forEach(function(el){ el.classList.remove('is-open'); });
       document.querySelectorAll('.dacc-l2-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
@@ -861,7 +816,7 @@ tailwind.config = {
     });
   });
 
-  // L2 — scope: parent L1 body
+  /* ── Accordion L2 ─────────────────────── */
   document.querySelectorAll('.dacc-l2-btn[data-l2]').forEach(function(btn) {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -874,7 +829,6 @@ tailwind.config = {
       if (parentL1) {
         parentL1.querySelectorAll('.dacc-l2-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
         parentL1.querySelectorAll('.dacc-l2-btn.is-open').forEach(function(el){ el.classList.remove('is-open'); });
-        // Tutup L3 di dalam L2 yang ditutup
         parentL1.querySelectorAll('.dacc-l3-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
         parentL1.querySelectorAll('.dacc-l3-btn.is-open').forEach(function(el){ el.classList.remove('is-open'); });
       }
@@ -882,7 +836,7 @@ tailwind.config = {
     });
   });
 
-  // L3 — scope: parent L2 body
+  /* ── Accordion L3 ─────────────────────── */
   document.querySelectorAll('.dacc-l3-btn[data-l3]').forEach(function(btn) {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -900,7 +854,7 @@ tailwind.config = {
     });
   });
 
-  /* ── Desktop flyout overflow guard ───────── */
+  /* ── Desktop flyout overflow guard ─────── */
   document.querySelectorAll('.nav-flyout').forEach(function(flyout) {
     var parent = flyout.closest('.has-flyout');
     if (!parent) return;
@@ -915,7 +869,7 @@ tailwind.config = {
     });
   });
 
-  /* ── Desktop flyout keyboard (Enter/Space) ── */
+  /* ── Keyboard flyout (Enter/Space) ─────── */
   document.querySelectorAll('.has-flyout[tabindex]').forEach(function(item) {
     item.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -923,7 +877,7 @@ tailwind.config = {
         var flyout = item.querySelector(':scope > .nav-flyout');
         if (!flyout) return;
         var visible = getComputedStyle(flyout).opacity === '1';
-        flyout.style.opacity   = visible ? '0' : '1';
+        flyout.style.opacity    = visible ? '0' : '1';
         flyout.style.visibility = visible ? 'hidden' : 'visible';
         flyout.style.transform  = visible ? 'translateX(6px)' : 'translateX(0)';
         flyout.style.pointerEvents = visible ? 'none' : 'auto';

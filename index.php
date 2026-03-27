@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__ . '/includes/config.php';
 
-// Deteksi subfolder otomatis (support localhost/chikaflorist/ maupun domain root)
-$basePath = parse_url(BASE_URL, PHP_URL_PATH); // = /chikaflorist
+// Deteksi subfolder otomatis
+$basePath = parse_url(BASE_URL, PHP_URL_PATH);
 $uriPath  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 if ($basePath && strpos($uriPath, $basePath) === 0) {
     $uriPath = substr($uriPath, strlen($basePath));
@@ -22,12 +22,12 @@ if (empty($request) || $request === 'index') {
     require __DIR__ . '/pages/home.php'; exit();
 }
 
-// ── Admin (ditangani folder sendiri) ─────────────────────
+// ── Admin ─────────────────────────────────────────────────
 if (strpos($request, 'admin') === 0) {
     http_response_code(404); require __DIR__ . '/pages/404.php'; exit();
 }
 
-// ── Area Layanan (daftar kota) ────────────────────────────
+// ── Area Layanan ──────────────────────────────────────────
 if ($request === 'area-layanan') {
     require __DIR__ . '/pages/location.php'; exit();
 }
@@ -38,7 +38,6 @@ if ($request === 'galeri') {
 }
 
 // ── Produk ───────────────────────────────────────────────
-
 if ($request === 'produk') {
     require __DIR__ . '/pages/products.php'; exit();
 }
@@ -52,6 +51,31 @@ if (strpos($request, 'produk/') === 0) {
         $_GET['slug'] = $prodSlug;
         require __DIR__ . '/pages/product.php'; exit();
     }
+}
+
+// ── Blog list: /blog ──────────────────────────────────────
+if ($request === 'blog') {
+    require __DIR__ . '/pages/blog.php'; exit();
+}
+
+// ── Blog detail: /blog/[slug] ─────────────────────────────
+if (preg_match('#^blog/([a-z0-9-]+)$#', $request, $m)) {
+    $stmt = $pdo->prepare("
+        SELECT b.*, bc.name AS cat_name, bc.slug AS cat_slug
+        FROM blogs b
+        LEFT JOIN blog_categories bc ON b.blog_category_id = bc.id
+        WHERE b.slug = ? AND b.status = 'active'
+        LIMIT 1
+    ");
+    $stmt->execute([$m[1]]);
+    $blog = $stmt->fetch();
+    if ($blog) {
+        require __DIR__ . '/pages/blog-detail.php';
+    } else {
+        http_response_code(404);
+        require __DIR__ . '/pages/404.php';
+    }
+    exit();
 }
 
 // ── Halaman Layanan Statis ────────────────────────────────
