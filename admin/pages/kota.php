@@ -21,7 +21,9 @@ if (isset($_POST['reorder']) && !empty($_POST['ids'])) {
     exit;
 }
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  
     $data = [
         'name'           => clean($_POST['name'] ?? ''),
         'slug'           => makeSlug($_POST['name'] ?? ''),
@@ -29,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'tier'           => (int)($_POST['tier'] ?? 1),
         'description'    => clean($_POST['description'] ?? ''),
         'landmark_notes' => $_POST['landmark_notes'] ?? '',
+        'content'        => $_POST['content'] ?? '',
         'meta_title'     => clean($_POST['meta_title'] ?? ''),
         'meta_desc'      => clean($_POST['meta_desc'] ?? ''),
         'is_active'      => isset($_POST['is_active']) ? 1 : 0,
@@ -143,6 +146,16 @@ if ($action === 'tambah' || ($action === 'edit' && $id)) {
             <textarea name="landmark_notes" class="form-input" rows="3"
                       placeholder="Jl. Sudirman, RS Siloam, Grand Indonesia, UI..."><?= clean($item['landmark_notes'] ?? '') ?></textarea>
           </div>
+
+          <div class="col-span-2">
+  <label class="form-label">
+    Konten Halaman (SEO)
+    <span class="text-gray-400 font-normal text-xs">(HTML diperbolehkan – h2, p, ul, strong, em)</span>
+  </label>
+  <textarea name="content" class="form-input font-mono text-xs" rows="10"
+            placeholder="<h2>Toko Bunga di Denpasar</h2>&#10;<p>Kami melayani pengiriman bunga...</p>"><?= htmlspecialchars($item['content'] ?? '') ?></textarea>
+  <p class="text-xs text-gray-400 mt-1">Konten ini akan tampil di halaman kota sebagai artikel SEO. Gunakan tag HTML seperti &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;strong&gt;.</p>
+</div>
 
           <div>
             <label class="form-label">Meta Title</label>

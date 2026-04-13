@@ -1,18 +1,23 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
-$slug = $_GET['slug'] ?? '';
-$pdo  = getDB();
-$stmt = $pdo->prepare("SELECT * FROM cities WHERE slug=? AND is_active=1");
-$stmt->execute([$slug]);
-$city = $stmt->fetch();
+$slug     = $_GET['slug'] ?? '';
+$pdo      = getDB();
+$slugSafe = $pdo->quote($slug);
+
+$stmt = $pdo->query("SELECT id, name, slug, content, landmark_notes, province, tier, description, meta_title, meta_desc, sort_order, is_active FROM cities WHERE slug={$slugSafe} AND is_active=1");
+$city = $stmt->fetch(PDO::FETCH_ASSOC);
+
 if (!$city) { http_response_code(404); require __DIR__ . '/404.php'; exit(); }
 
-$areas     = getAreasByCity($city['id']);
-$prodCats  = getMainCategories();
-$nearby    = $pdo->query("SELECT name,slug FROM cities WHERE is_active=1 AND id!={$city['id']} ORDER BY tier ASC LIMIT 8")->fetchAll();
-$featured  = $pdo->query("SELECT p.*,c.name as cat_name FROM products p JOIN categories c ON p.category_id=c.id WHERE p.is_featured=1 AND p.is_active=1 ORDER BY RAND() LIMIT 4")->fetchAll();
+// fetchColumn terbukti satu-satunya cara yang bekerja
+$areas    = getAreasByCity($city['id']);
+$prodCats = getMainCategories();
+$nearby   = $pdo->query("SELECT name,slug FROM cities WHERE is_active=1 AND id!={$city['id']} ORDER BY tier ASC LIMIT 8")->fetchAll();
+$featured = $pdo->query("SELECT p.*,c.name as cat_name FROM products p JOIN categories c ON p.category_id=c.id WHERE p.is_featured=1 AND p.is_active=1 ORDER BY RAND() LIMIT 4")->fetchAll();
 
 $kota          = clean($city['name']);
+$landmarkNotes = $city['landmark_notes'] ?? '';
+$contentHtml   = $city['content'] ?? '';
 $provinsi      = clean($city['province'] ?? '');
 $tierLabel     = ($city['tier'] == 1) ? 'Kota Utama' : (($city['tier'] == 2) ? 'Kota Besar' : 'Kota Layanan');
 $page_title    = $city['meta_title'] ?: "Toko Bunga {$kota} 24 Jam | Florist & Kirim Bunga Cepat – Chika Florist";
@@ -576,7 +581,20 @@ require_once __DIR__ . '/../includes/header.php';
   pointer-events: none;
   z-index: 2;
 }
+/* ── LOC CONTENT SEO ── */
+.loc-content h1 { font-family:'Cormorant Garamond',Georgia,serif; font-size:1.7rem; font-weight:700; color:#3a2420; margin-bottom:.9rem; margin-top:1.4rem; line-height:1.2; }
+.loc-content h2 { font-family:'Cormorant Garamond',Georgia,serif; font-size:1.35rem; font-weight:700; color:#3a2420; margin-bottom:.7rem; margin-top:1.2rem; line-height:1.3; }
+.loc-content h3 { font-family:'Cormorant Garamond',Georgia,serif; font-size:1.1rem; font-weight:600; color:var(--rose); margin-bottom:.45rem; margin-top:.9rem; }
+.loc-content p  { margin-bottom:.75rem; color:rgba(58,36,32,.60); font-size:.9rem; line-height:1.8; }
+.loc-content ul { list-style:disc; padding-left:1.5rem; margin-bottom:.75rem; }
+.loc-content ol { list-style:decimal; padding-left:1.5rem; margin-bottom:.75rem; }
+.loc-content li { margin-bottom:.25rem; color:rgba(58,36,32,.55); font-size:.88rem; line-height:1.7; }
+.loc-content strong { color:#3a2420; font-weight:700; }
+.loc-content em { color:var(--rose); font-style:italic; }
+.loc-content a  { color:var(--rose); text-decoration:underline; transition:color .2s; }
+.loc-content a:hover { color:#e8778a; }
 </style>
+
 
 <!-- ==============================
      HERO — BRIGHT FLORAL
@@ -839,7 +857,7 @@ require_once __DIR__ . '/../includes/header.php';
     <?php endif; ?>
 
     <!-- LANDMARK NOTES -->
-    <?php if (!empty($city['landmark_notes'])): ?>
+    <?php if (!empty($landmarkNotes)): ?>
     <div class="mb-14">
       <p class="sec-eyebrow">Jangkauan Pengiriman</p>
       <h2 class="sec-title">Cakupan Area di <?= $kota ?></h2>
@@ -847,13 +865,29 @@ require_once __DIR__ . '/../includes/header.php';
       <p class="seo-prose mt-2 mb-4">Pengiriman bunga mencakup berbagai titik strategis di <?= $kota ?>:</p>
       <div class="lm-chips">
         <?php
-        $lmarks = array_filter(array_map('trim', explode(',', str_replace(["\n",';'], ',', $city['landmark_notes']))));
+        $lmarks = array_filter(array_map('trim', explode(',', str_replace(["\n",';'], ',', $landmarkNotes))));
         foreach ($lmarks as $lm): if(empty($lm)) continue; ?>
         <span class="lm-chip"><span class="lm-dot"></span><?= clean($lm) ?></span>
         <?php endforeach; ?>
       </div>
     </div>
     <?php endif; ?>
+      
+
+<!-- KONTEN SEO -->
+<?php if (!empty(trim($contentHtml))): ?>
+<div class="mb-14">
+  <p class="sec-eyebrow">Tentang Kami</p>
+  <h2 class="sec-title">Toko Bunga <?= $kota ?> Terpercaya</h2>
+  <div class="sec-gold"></div>
+  <div class="mt-5 rounded-2xl p-6 sm:p-8"
+       style="background:#fff;border:1px solid #fde8b4;box-shadow:0 4px 20px rgba(201,168,76,0.08);">
+    <div class="loc-content">
+      <?= $contentHtml ?>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
 
     <!-- KATEGORI PRODUK -->
     <div class="mb-14">

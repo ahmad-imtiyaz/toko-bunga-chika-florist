@@ -26,15 +26,23 @@ function getDB() {
         try {
             $dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=".DB_CHARSET;
             $pdo = new PDO($dsn, DB_USER, DB_PASS, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_EMULATE_PREPARES   => true,  // ← ubah false ke true
             ]);
         } catch (PDOException $e) {
             die('Koneksi database gagal.');
         }
     }
     return $pdo;
+}
+function getRawContent($table, $id_field, $id_value, $column) {
+    $dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=".DB_CHARSET;
+    $pdo = new PDO($dsn, DB_USER, DB_PASS);
+    $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+    $stmt = $pdo->prepare("SELECT `$column` FROM `$table` WHERE `$id_field` = ? LIMIT 1");
+    $stmt->execute([$id_value]);
+    return $stmt->fetchColumn();
 }
 
 function getSetting($key, $default = '') {

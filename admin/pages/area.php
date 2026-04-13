@@ -37,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'description'  => clean($_POST['description'] ?? ''),
         'landmarks'    => $_POST['landmarks'] ?? '',
         'nearby_areas' => $_POST['nearby_areas'] ?? '',
+        'content'      => $_POST['content'] ?? '',
         'meta_title'   => clean($_POST['meta_title'] ?? ''),
         'meta_desc'    => clean($_POST['meta_desc'] ?? ''),
         'is_active'    => isset($_POST['is_active']) ? 1 : 0,
@@ -150,6 +151,16 @@ if ($action === 'tambah' || ($action === 'edit' && $id)) {
                       placeholder="Menteng, Cikini, Manggarai, Pancoran..."><?= clean($item['nearby_areas'] ?? '') ?></textarea>
             <p class="text-xs text-gray-400 mt-1">Nama area/kecamatan terdekat untuk internal linking dan SEO kontekstual.</p>
           </div>
+
+          <div class="col-span-2">
+  <label class="form-label">
+    Konten Halaman (SEO)
+    <span class="text-gray-400 font-normal text-xs">(HTML diperbolehkan – h2, p, ul, strong, em)</span>
+  </label>
+  <textarea name="content" class="form-input font-mono text-xs" rows="10"
+            placeholder="<h2>Toko Bunga di Denpasar Barat</h2>&#10;<p>Kami melayani pengiriman bunga...</p>"><?= htmlspecialchars($item['content'] ?? '') ?></textarea>
+  <p class="text-xs text-gray-400 mt-1">Konten ini akan tampil di halaman area sebagai artikel SEO. Gunakan tag HTML seperti &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;strong&gt;.</p>
+</div>
 
           <div>
             <label class="form-label">Meta Title</label>
