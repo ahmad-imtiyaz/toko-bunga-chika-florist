@@ -211,6 +211,116 @@ tailwind.config = {
 }
 .see-all-link:hover { background: #fdf2f8; }
 
+/* ════════════════════════════════════════════════
+   AREA LAYANAN — Scrollable panel + flyout fix
+   ════════════════════════════════════════════════ */
+
+/* Panel Area Layanan dibatasi tingginya */
+.nav-panel--area {
+  max-height: calc(100vh - 90px);
+  display: flex;
+  flex-direction: column;
+  overflow: visible; /* JANGAN overflow:hidden/auto di sini */
+}
+
+.nav-panel--area .nav-panel-scroll {
+  overflow-y: auto;
+  overflow-x: visible;
+  flex: 1;
+  /* Trick: pakai padding-right untuk ruang scrollbar tanpa clip */
+  scrollbar-width: thin;
+  scrollbar-color: #fca5a5 #fdf2f8;
+}
+.nav-panel--area .nav-panel-scroll::-webkit-scrollbar { width: 4px; }
+.nav-panel--area .nav-panel-scroll::-webkit-scrollbar-track { background: #fdf2f8; border-radius: 4px; }
+.nav-panel--area .nav-panel-scroll::-webkit-scrollbar-thumb { background: #fca5a5; border-radius: 4px; }
+.nav-panel--area .nav-panel-scroll::-webkit-scrollbar-thumb:hover { background: #be185d; }
+
+/* Sembunyikan flyout asli di area layanan — digantikan oleh teleport JS */
+.nav-panel--area .nav-flyout {
+  display: none !important;
+}
+
+/* ════════════════════════════════════════════════
+   AREA LAYANAN — Scrollable panel + teleport flyout
+   ════════════════════════════════════════════════ */
+.nav-panel--area {
+  max-height: calc(100vh - 90px);
+  display: flex;
+  flex-direction: column;
+}
+.nav-panel--area .nav-panel-scroll {
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #fca5a5 #fdf2f8;
+}
+.nav-panel--area .nav-panel-scroll::-webkit-scrollbar { width: 4px; }
+.nav-panel--area .nav-panel-scroll::-webkit-scrollbar-track { background: #fdf2f8; border-radius: 4px; }
+.nav-panel--area .nav-panel-scroll::-webkit-scrollbar-thumb { background: #fca5a5; border-radius: 4px; }
+.nav-panel--area .nav-panel-scroll::-webkit-scrollbar-thumb:hover { background: #be185d; }
+
+.nav-panel--area .see-all-link {
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+/* Flyout yang di-teleport ke body */
+.nav-flyout--teleport {
+  position: fixed;
+  min-width: 190px;
+  max-width: 230px;
+  background: #fff;
+  border: 1px solid #fce7f3;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(190,24,93,0.08), 0 2px 8px rgba(0,0,0,0.06);
+  padding: 6px 0;
+  z-index: 9998;
+  pointer-events: auto;
+}
+.nav-flyout--teleport .nav-flyout-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  font-size: 0.825rem;
+  color: #6b7280;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.nav-flyout--teleport .nav-flyout-item::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: #f9a8d4;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.nav-flyout--teleport .nav-flyout-item:hover { background: #fdf2f8; color: #be185d; }
+.nav-flyout--teleport .nav-panel-divider { height: 1px; background: #fce7f3; margin: 4px 0; }
+
+/* Item di dalam flyout teleport yang punya sub-flyout */
+.nav-flyout--teleport .has-flyout-t {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 16px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #374151;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.nav-flyout--teleport .has-flyout-t:hover { background: #fdf2f8; color: #be185d; }
+.nav-flyout--teleport .has-flyout-t .chev-r {
+  width: 13px; height: 13px; color: #d1d5db; flex-shrink: 0; transition: color .15s;
+}
+.nav-flyout--teleport .has-flyout-t:hover .chev-r { color: #be185d; }
+
 .nav-trigger {
   display: flex;
   align-items: center;
@@ -485,47 +595,54 @@ tailwind.config = {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
         </svg>
       </button>
-      <div class="nav-panel" role="menu">
-        <?php foreach ($navProvincesDisplay as $provName => $provCities): ?>
-          <div class="has-flyout nav-panel-item" role="none" tabindex="0">
-            <span><?= clean($provName) ?></span>
-            <svg class="chev-r" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
-            </svg>
-            <div class="nav-flyout" role="menu">
-              <?php foreach ($provCities as $city):
-                $areas = $navAreas[$city['id']] ?? [];
-              ?>
-                <?php if (!empty($areas)): ?>
-                  <div class="has-flyout nav-panel-item" role="none" tabindex="0" style="font-weight:500;">
-                    <span><?= clean($city['name']) ?></span>
-                    <svg class="chev-r" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
-                    </svg>
-                    <div class="nav-flyout" role="menu">
-                      <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="nav-flyout-item" role="menuitem">
-                        Semua Area <?= clean($city['name']) ?>
-                      </a>
-                      <div class="nav-panel-divider"></div>
-                      <?php foreach ($areas as $area): ?>
-                      <a href="<?= $base ?>/toko-bunga-<?= $area['slug'] ?>" class="nav-flyout-item" role="menuitem">
-                        <?= clean($area['name']) ?>
-                      </a>
-                      <?php endforeach; ?>
-                    </div>
-                  </div>
-                <?php else: ?>
+  <!-- sesudah — tambahkan class nav-panel--area dan wrapper nav-panel-scroll -->
+<div class="nav-panel nav-panel--area" role="menu">
+
+  <!-- Bagian scrollable -->
+  <div class="nav-panel-scroll">
+    <?php foreach ($navProvincesDisplay as $provName => $provCities): ?>
+      <div class="has-flyout nav-panel-item" role="none" tabindex="0">
+        <span><?= clean($provName) ?></span>
+        <svg class="chev-r" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+        </svg>
+        <div class="nav-flyout" role="menu">
+          <?php foreach ($provCities as $city):
+            $areas = $navAreas[$city['id']] ?? [];
+          ?>
+            <?php if (!empty($areas)): ?>
+              <div class="has-flyout nav-panel-item" role="none" tabindex="0" style="font-weight:500;">
+                <span><?= clean($city['name']) ?></span>
+                <svg class="chev-r" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                </svg>
+                <div class="nav-flyout" role="menu">
                   <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="nav-flyout-item" role="menuitem">
-                    <?= clean($city['name']) ?>
+                    Semua Area <?= clean($city['name']) ?>
                   </a>
-                <?php endif; ?>
-              <?php endforeach; ?>
-            </div>
-          </div>
-        <?php endforeach; ?>
-        <div class="nav-panel-divider"></div>
-        <a href="<?= $base ?>/area-layanan" class="see-all-link">Lihat Semua Area →</a>
+                  <div class="nav-panel-divider"></div>
+                  <?php foreach ($areas as $area): ?>
+                  <a href="<?= $base ?>/toko-bunga-<?= $area['slug'] ?>" class="nav-flyout-item" role="menuitem">
+                    <?= clean($area['name']) ?>
+                  </a>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+            <?php else: ?>
+              <a href="<?= $base ?>/toko-bunga-<?= $city['slug'] ?>" class="nav-flyout-item" role="menuitem">
+                <?= clean($city['name']) ?>
+              </a>
+            <?php endif; ?>
+          <?php endforeach; ?>
+        </div>
       </div>
+    <?php endforeach; ?>
+  </div><!-- /nav-panel-scroll -->
+
+  <!-- Tombol sticky di bawah -->
+  <a href="<?= $base ?>/area-layanan" class="see-all-link">Lihat Semua Area →</a>
+
+</div><!-- /nav-panel--area -->
     </div>
 
     <a href="<?= $base ?>/toko-bunga-online-24-jam-indonesia"
@@ -804,14 +921,12 @@ tailwind.config = {
       var body = document.getElementById('l1-' + key);
       if (!body) return;
       var isOpen = body.classList.contains('is-open');
-
       document.querySelectorAll('.dacc-l1-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
       document.querySelectorAll('.dacc-l1-btn.is-open').forEach(function(el){ el.classList.remove('is-open'); });
       document.querySelectorAll('.dacc-l2-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
       document.querySelectorAll('.dacc-l2-btn.is-open').forEach(function(el){ el.classList.remove('is-open'); });
       document.querySelectorAll('.dacc-l3-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
       document.querySelectorAll('.dacc-l3-btn.is-open').forEach(function(el){ el.classList.remove('is-open'); });
-
       if (!isOpen) { body.classList.add('is-open'); btn.classList.add('is-open'); }
     });
   });
@@ -824,7 +939,6 @@ tailwind.config = {
       var body = document.getElementById(key);
       if (!body) return;
       var isOpen = body.classList.contains('is-open');
-
       var parentL1 = btn.closest('.dacc-l1-body');
       if (parentL1) {
         parentL1.querySelectorAll('.dacc-l2-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
@@ -844,7 +958,6 @@ tailwind.config = {
       var body = document.getElementById(key);
       if (!body) return;
       var isOpen = body.classList.contains('is-open');
-
       var parentL2 = btn.closest('.dacc-l2-body');
       if (parentL2) {
         parentL2.querySelectorAll('.dacc-l3-body.is-open').forEach(function(el){ el.classList.remove('is-open'); });
@@ -854,8 +967,8 @@ tailwind.config = {
     });
   });
 
-  /* ── Desktop flyout overflow guard ─────── */
-  document.querySelectorAll('.nav-flyout').forEach(function(flyout) {
+  /* ── Desktop flyout overflow guard (untuk non-area panel) ── */
+  document.querySelectorAll('.nav-panel:not(.nav-panel--area) .nav-flyout').forEach(function(flyout) {
     var parent = flyout.closest('.has-flyout');
     if (!parent) return;
     parent.addEventListener('mouseenter', function() {
@@ -884,6 +997,170 @@ tailwind.config = {
       }
     });
   });
+
+})();
+
+/* ── Area Layanan: Teleport Flyout (FINAL — tanpa kode lama) ── */
+(function () {
+  'use strict';
+
+  var activeL1Flyout = null;
+  var activeL2Flyout = null;
+  var hideL1Timer    = null;
+  var hideL2Timer    = null;
+
+  function createTeleportFlyout(content) {
+    var el = document.createElement('div');
+    el.className = 'nav-flyout--teleport';
+    el.style.display = 'none';
+    el.innerHTML = content;
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function positionAt(flyoutEl, triggerEl) {
+    flyoutEl.style.display = 'block';
+    flyoutEl.style.top  = '-9999px';
+    flyoutEl.style.left = '-9999px';
+
+    /* Hitung ukuran flyout dulu */
+    var fw = flyoutEl.offsetWidth;
+    var fh = flyoutEl.offsetHeight;
+    var r  = triggerEl.getBoundingClientRect();
+
+    var top  = r.top;
+    var left = r.right + 6;  /* muncul di kanan trigger */
+
+    /* Jangan melewati batas bawah layar */
+    if (top + fh > window.innerHeight - 8) {
+      top = window.innerHeight - fh - 8;
+    }
+    if (top < 8) top = 8;
+
+    /* Jangan melewati batas kanan layar — balik ke kiri trigger */
+    if (left + fw > window.innerWidth - 8) {
+      left = r.left - fw - 6;
+    }
+
+    flyoutEl.style.top  = top + 'px';
+    flyoutEl.style.left = left + 'px';
+  }
+
+  function hideL2() {
+    if (activeL2Flyout) { activeL2Flyout.style.display = 'none'; activeL2Flyout = null; }
+  }
+  function hideL1() {
+    hideL2();
+    if (activeL1Flyout) { activeL1Flyout.style.display = 'none'; activeL1Flyout = null; }
+  }
+
+  var areaPanel = document.querySelector('.nav-panel--area');
+  if (!areaPanel) return;
+
+  var scrollEl = areaPanel.querySelector('.nav-panel-scroll');
+  if (!scrollEl) return;
+
+  var provItems = scrollEl.querySelectorAll(':scope > .has-flyout');
+
+  provItems.forEach(function (provItem) {
+    var origFlyout = provItem.querySelector(':scope > .nav-flyout');
+    if (!origFlyout) return;
+
+    /* Build HTML flyout L1 (daftar kota) */
+    var l1Html = '';
+    origFlyout.querySelectorAll(':scope > .has-flyout, :scope > .nav-flyout-item, :scope > .nav-panel-divider').forEach(function (ci) {
+      if (ci.classList.contains('nav-panel-divider')) {
+        l1Html += '<div class="nav-panel-divider"></div>';
+      } else if (ci.classList.contains('has-flyout')) {
+        var cityName   = (ci.querySelector('span') || ci).textContent.trim();
+        var cityFlyout = ci.querySelector(':scope > .nav-flyout');
+        var dataAreas  = cityFlyout ? encodeURIComponent(cityFlyout.innerHTML) : '';
+        l1Html += '<div class="has-flyout-t" data-areas="' + dataAreas + '">' +
+                  '<span>' + cityName + '</span>' +
+                  '<svg class="chev-r" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>' +
+                  '</svg></div>';
+      } else {
+        l1Html += ci.outerHTML;
+      }
+    });
+
+    if (!l1Html) return;
+
+    var tpL1 = createTeleportFlyout(l1Html);
+
+    /* Pasang event hover kota — dipanggil ulang tiap kali L1 dibuka */
+    function bindCityHover() {
+      tpL1.querySelectorAll('.has-flyout-t').forEach(function (cityItem) {
+        /* Hindari double-bind */
+        if (cityItem._bound) return;
+        cityItem._bound = true;
+
+        cityItem.addEventListener('mouseenter', function () {
+          clearTimeout(hideL2Timer);
+          if (activeL2Flyout) { activeL2Flyout.style.display = 'none'; activeL2Flyout = null; }
+
+          var areasHtml = decodeURIComponent(cityItem.getAttribute('data-areas') || '');
+          if (!areasHtml) return;
+
+          if (!cityItem._tpL2) {
+            cityItem._tpL2 = createTeleportFlyout(areasHtml);
+            /* Hover pada flyout L2 agar tidak langsung hilang */
+            cityItem._tpL2.addEventListener('mouseenter', function () { clearTimeout(hideL2Timer); clearTimeout(hideL1Timer); });
+            cityItem._tpL2.addEventListener('mouseleave', function () {
+              hideL2Timer = setTimeout(function () { if (activeL2Flyout && !activeL2Flyout.matches(':hover')) hideL2(); }, 150);
+            });
+          }
+
+          activeL2Flyout = cityItem._tpL2;
+          positionAt(activeL2Flyout, cityItem);
+        });
+
+        cityItem.addEventListener('mouseleave', function () {
+          hideL2Timer = setTimeout(function () {
+            if (activeL2Flyout && !activeL2Flyout.matches(':hover')) hideL2();
+          }, 120);
+        });
+      });
+    }
+
+    /* Hover provinsi → tampilkan L1 */
+    provItem.addEventListener('mouseenter', function () {
+      clearTimeout(hideL1Timer);
+      clearTimeout(hideL2Timer);
+
+      if (activeL1Flyout && activeL1Flyout !== tpL1) {
+        activeL1Flyout.style.display = 'none';
+        hideL2();
+      }
+
+      activeL1Flyout = tpL1;
+      positionAt(tpL1, provItem);  /* posisi relatif terhadap item provinsi */
+      bindCityHover();
+    });
+
+    provItem.addEventListener('mouseleave', function () {
+      hideL1Timer = setTimeout(function () {
+        if (activeL1Flyout && !activeL1Flyout.matches(':hover')) hideL1();
+      }, 120);
+    });
+
+    tpL1.addEventListener('mouseenter', function () { clearTimeout(hideL1Timer); clearTimeout(hideL2Timer); });
+    tpL1.addEventListener('mouseleave', function () {
+      hideL1Timer = setTimeout(function () { hideL1(); }, 150);
+    });
+  });
+
+  /* Sembunyikan saat scroll */
+  scrollEl.addEventListener('scroll', function () { hideL1(); }, { passive: true });
+
+  /* Sembunyikan saat mouse keluar dari dropdown */
+  var areaDropdown = areaPanel.closest('.nav-dropdown');
+  if (areaDropdown) {
+    areaDropdown.addEventListener('mouseleave', function () {
+      hideL1Timer = setTimeout(function () { hideL1(); }, 150);
+    });
+  }
 
 })();
 </script>
