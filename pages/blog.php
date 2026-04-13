@@ -24,6 +24,7 @@ $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM blogs b LEFT JOIN blog_categor
 $count_stmt->execute($params);
 $total      = (int)$count_stmt->fetchColumn();
 $total_page = (int)ceil($total / $per_page);
+$wa_url     = waLink();
 
 $stmt = $pdo->prepare("
     SELECT b.*, bc.name AS cat_name, bc.slug AS cat_slug

@@ -262,29 +262,85 @@ $mob_tier_labels = [1 => 'Kota Utama', 2 => 'Kota Sekitar', 3 => 'Area Lainnya']
       </div>
     </div>
 
-    <!-- ── 5. Area Pengiriman (grouped by tier) ── -->
-    <?php if (!empty($mob_cities_by_tier)): ?>
-    <div class="mob-sb-section" style="padding:16px 18px;">
-      <h3 style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;
-                 color:var(--ink);margin-bottom:4px;">📍 Area Pengiriman</h3>
-      <p style="font-family:'Lato',sans-serif;font-size:10px;color:var(--muted);
-                margin-bottom:12px;letter-spacing:.05em;">Melayani wilayah Jakarta &amp; sekitarnya</p>
+  <!-- ── 5. Area Pengiriman (grouped by tier, slider 10 per page) ── -->
+<?php if (!empty($mob_cities_by_tier)): ?>
+<div class="mob-sb-section" style="padding:16px 18px;">
+  <h3 style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;
+             color:var(--ink);margin-bottom:4px;">📍 Area Pengiriman</h3>
+  <p style="font-family:'Lato',sans-serif;font-size:10px;color:var(--muted);
+            margin-bottom:12px;letter-spacing:.05em;">Melayani wilayah Jakarta &amp; sekitarnya</p>
 
-      <?php foreach ($mob_cities_by_tier as $tier => $tier_cities): ?>
-      <div class="mob-tier-label"><?= $mob_tier_labels[$tier] ?? 'Area Tier '.$tier ?></div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
-        <?php foreach ($tier_cities as $city): ?>
-        <a href="<?= BASE_URL ?>/toko-bunga-<?= clean($city['slug']) ?>" class="mob-area-tag">
-          <span style="width:3px;height:3px;border-radius:50%;
-                       background:<?= $tier==1?'var(--rose)':($tier==2?'var(--gold)':'rgba(225,29,72,.3)') ?>;
-                       display:inline-block;flex-shrink:0;"></span>
-          <?= clean($city['name']) ?>
-        </a>
-        <?php endforeach; ?>
-      </div>
-      <?php endforeach; ?>
+  <?php
+  // Flatten semua kota dengan info tier, urutan tier dipertahankan
+  $mob_all_cities_flat = [];
+  foreach ($mob_cities_by_tier as $tier => $tier_cities) {
+    foreach ($tier_cities as $city) {
+      $mob_all_cities_flat[] = array_merge($city, ['_tier' => $tier]);
+    }
+  }
+  $ck_mob_per_page = 10;
+  $ck_mob_total    = count($mob_all_cities_flat);
+  $ck_mob_pages    = (int)ceil($ck_mob_total / $ck_mob_per_page);
+  ?>
+
+  <?php for ($p = 0; $p < $ck_mob_pages; $p++): ?>
+  <div id="ckMobAreaPage<?= $p ?>"
+       style="display:<?= $p === 0 ? 'grid' : 'none' ?>;
+              grid-template-columns:repeat(2,1fr);
+              gap:6px; min-height:60px;">
+    <?php
+    $slice = array_slice($mob_all_cities_flat, $p * $ck_mob_per_page, $ck_mob_per_page);
+    foreach ($slice as $city):
+      $t = $city['_tier'];
+      $dot_color = $t == 1 ? 'var(--rose)' : ($t == 2 ? 'var(--gold)' : 'rgba(225,29,72,.3)');
+    ?>
+    <a href="<?= BASE_URL ?>/toko-bunga-<?= clean($city['slug']) ?>"
+       class="mob-area-tag"
+       style="overflow:hidden;min-width:0;">
+      <span style="width:3px;height:3px;border-radius:50%;
+                   background:<?= $dot_color ?>;
+                   display:inline-block;flex-shrink:0;"></span>
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">
+        <?= clean($city['name']) ?>
+      </span>
+    </a>
+    <?php endforeach; ?>
+  </div>
+  <?php endfor; ?>
+
+  <?php if ($ck_mob_pages > 1): ?>
+  <div style="display:flex;align-items:center;justify-content:space-between;
+              margin-top:12px;padding-top:10px;border-top:1px solid var(--cream-dd);">
+    <button id="ckMobAreaPrev" onclick="ckMobAreaSlider(-1)"
+            class="mob-sb-nav"
+            style="width:auto;height:auto;border-radius:8px;
+                   padding:4px 12px;font-size:11px;">
+      ‹ Prev
+    </button>
+
+    <div style="display:flex;gap:4px;align-items:center;">
+      <?php for ($p = 0; $p < $ck_mob_pages; $p++): ?>
+      <span id="ckMobAreaDot<?= $p ?>" onclick="ckMobAreaGoPage(<?= $p ?>)"
+            style="display:inline-block;height:5px;border-radius:3px;cursor:pointer;transition:all .2s;
+                   width:<?= $p === 0 ? '16px' : '5px' ?>;
+                   background:<?= $p === 0 ? 'var(--rose)' : 'rgba(225,29,72,.15)' ?>;"></span>
+      <?php endfor; ?>
     </div>
-    <?php endif; ?>
+
+    <button id="ckMobAreaNext" onclick="ckMobAreaSlider(1)"
+            class="mob-sb-nav"
+            style="width:auto;height:auto;border-radius:8px;
+                   padding:4px 12px;font-size:11px;">
+      Next ›
+    </button>
+  </div>
+  <p id="ckMobAreaInfo"
+     style="text-align:center;font-family:'Lato',sans-serif;font-size:11px;
+            color:var(--muted);margin-top:5px;"></p>
+  <?php endif; ?>
+
+</div>
+<?php endif; ?>
 
     <!-- ── 6. Bottom CTA strip ── -->
     <div style="background:var(--ink);border-radius:16px;padding:20px 22px;
@@ -367,5 +423,48 @@ $mob_tier_labels = [1 => 'Kota Utama', 2 => 'Kota Sekitar', 3 => 'Area Lainnya']
   }
 
   window.slideCatMobCk = function(dir) { goTo(cur + dir); };
+})();
+/* ── Area Pengiriman slider — Chika mobile ── */
+(function(){
+  var perPage = <?= $ck_mob_per_page ?>;
+  var total   = <?= $ck_mob_total ?>;
+  var pages   = <?= $ck_mob_pages ?>;
+  var cur     = 0;
+
+  function update() {
+    for (var i = 0; i < pages; i++) {
+      var el = document.getElementById('ckMobAreaPage' + i);
+      if (el) el.style.display = (i === cur) ? 'grid' : 'none';
+    }
+    for (var i = 0; i < pages; i++) {
+      var dot = document.getElementById('ckMobAreaDot' + i);
+      if (!dot) continue;
+      dot.style.width      = (i === cur) ? '16px' : '5px';
+      dot.style.background = (i === cur) ? 'var(--rose)' : 'rgba(225,29,72,.15)';
+    }
+    var prev = document.getElementById('ckMobAreaPrev');
+    var next = document.getElementById('ckMobAreaNext');
+    if (prev) {
+      prev.disabled      = (cur === 0);
+      prev.style.opacity = (cur === 0) ? '0.35' : '1';
+      prev.style.cursor  = (cur === 0) ? 'not-allowed' : 'pointer';
+    }
+    if (next) {
+      next.disabled      = (cur === pages - 1);
+      next.style.opacity = (cur === pages - 1) ? '0.35' : '1';
+      next.style.cursor  = (cur === pages - 1) ? 'not-allowed' : 'pointer';
+    }
+    var info = document.getElementById('ckMobAreaInfo');
+    if (info) {
+      var start = cur * perPage + 1;
+      var end   = Math.min((cur + 1) * perPage, total);
+      info.textContent = start + '–' + end + ' dari ' + total + ' area';
+    }
+  }
+
+  window.ckMobAreaSlider = function(dir) { cur = Math.max(0, Math.min(pages - 1, cur + dir)); update(); };
+  window.ckMobAreaGoPage = function(p)   { cur = p; update(); };
+
+  update();
 })();
 </script>
