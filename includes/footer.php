@@ -409,22 +409,87 @@ $mainCats    = getMainCategories();
   <div class="cf-footer-blob cf-footer-blob-3"></div>
   <div class="cf-footer-trellis"></div>
 
-  <!-- SEO City Strip -->
-  <?php if (!empty($allCities)): ?>
-  <div class="cf-footer-cities">
-    <div class="cf-footer-cities-inner">
-      <div class="cf-footer-cities-label">✦ Area Layanan Kami</div>
-      <div class="cf-footer-city-links">
-        <?php foreach ($allCities as $i => $city): ?>
-        <a href="<?= BASE_URL ?>/toko-bunga-<?= $city['slug'] ?>">Toko Bunga <?= clean($city['name']) ?></a>
-        <?php if ($i < count($allCities) - 1): ?>
-        <span class="cf-footer-city-sep">·</span>
-        <?php endif; ?>
-        <?php endforeach; ?>
-      </div>
+ <!-- SEO City Strip -->
+<?php if (!empty($allCities)): ?>
+<div class="cf-footer-cities">
+  <div class="cf-footer-cities-inner">
+    <div class="cf-footer-cities-label">✦ Area Layanan Kami</div>
+
+    <?php
+    $city_per_page = 10;
+    $city_total    = count($allCities);
+    $city_pages    = (int)ceil($city_total / $city_per_page);
+    ?>
+
+    <!-- Halaman-halaman kota -->
+    <?php for ($p = 0; $p < $city_pages; $p++): ?>
+    <div id="cityStripPage<?= $p ?>"
+         style="display:<?= $p === 0 ? 'flex' : 'none' ?>;
+                flex-wrap:wrap; gap:.3rem .5rem; align-items:center;">
+      <?php
+      $slice = array_slice($allCities, $p * $city_per_page, $city_per_page);
+      foreach ($slice as $i => $city):
+      ?>
+      <a href="<?= BASE_URL ?>/toko-bunga-<?= $city['slug'] ?>"
+         class="cf-footer-city-links" style="display:inline;">
+        Toko Bunga <?= clean($city['name']) ?>
+      </a>
+      <?php if ($i < count($slice) - 1): ?>
+      <span class="cf-footer-city-sep">·</span>
+      <?php endif; ?>
+      <?php endforeach; ?>
     </div>
+    <?php endfor; ?>
+
+    <!-- Navigasi -->
+    <?php if ($city_pages > 1): ?>
+    <div style="display:flex;align-items:center;justify-content:space-between;
+                margin-top:.9rem;padding-top:.7rem;
+                border-top:1px solid rgba(160,100,90,.10);">
+
+      <button id="cityStripPrev" onclick="cityStripSlider(-1)"
+              style="font-size:.68rem;padding:4px 12px;border-radius:7px;
+                     border:1px solid rgba(192,72,90,.20);
+                     background:rgba(255,255,255,.65);
+                     color:rgba(140,60,55,.55);cursor:pointer;
+                     backdrop-filter:blur(6px);transition:all .2s;"
+              onmouseover="if(!this.disabled){this.style.background='rgba(192,72,90,.08)';this.style.borderColor='rgba(192,72,90,.35)';this.style.color='rgba(192,72,90,.9)';}"
+              onmouseout="this.style.background='rgba(255,255,255,.65)';this.style.borderColor='rgba(192,72,90,.20)';this.style.color='rgba(140,60,55,.55)';">
+        ‹ Prev
+      </button>
+
+      <div style="display:flex;align-items:center;gap:5px;">
+        <div id="cityStripDots" style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
+          <?php for ($p = 0; $p < $city_pages; $p++): ?>
+          <button onclick="cityStripGoPage(<?= $p ?>)" id="cityStripDot<?= $p ?>"
+                  style="width:<?= $p === 0 ? '16px' : '5px' ?>;height:5px;
+                         border-radius:3px;border:none;padding:0;cursor:pointer;
+                         transition:all .2s;
+                         background:<?= $p === 0 ? 'rgba(192,72,90,.60)' : 'rgba(192,72,90,.2)' ?>;"></button>
+          <?php endfor; ?>
+        </div>
+        <span id="cityStripInfo"
+              style="font-size:.62rem;color:rgba(140,60,55,.40);
+                     letter-spacing:.06em;margin-left:6px;"></span>
+      </div>
+
+      <button id="cityStripNext" onclick="cityStripSlider(1)"
+              style="font-size:.68rem;padding:4px 12px;border-radius:7px;
+                     border:1px solid rgba(192,72,90,.20);
+                     background:rgba(255,255,255,.65);
+                     color:rgba(140,60,55,.55);cursor:pointer;
+                     backdrop-filter:blur(6px);transition:all .2s;"
+              onmouseover="if(!this.disabled){this.style.background='rgba(192,72,90,.08)';this.style.borderColor='rgba(192,72,90,.35)';this.style.color='rgba(192,72,90,.9)';}"
+              onmouseout="this.style.background='rgba(255,255,255,.65)';this.style.borderColor='rgba(192,72,90,.20)';this.style.color='rgba(140,60,55,.55)';">
+        Next ›
+      </button>
+
+    </div>
+    <?php endif; ?>
+
   </div>
-  <?php endif; ?>
+</div>
+<?php endif; ?>
 
   <!-- Main Grid -->
   <div class="cf-footer-main">
@@ -761,6 +826,49 @@ $mainCats    = getMainCategories();
   });
 
   rebuild();
+})();
+/* ── Area Layanan strip slider ── */
+(function(){
+  var perPage = <?= $city_per_page ?>;
+  var total   = <?= $city_total ?>;
+  var pages   = <?= $city_pages ?>;
+  var cur     = 0;
+
+  function update() {
+    for (var i = 0; i < pages; i++) {
+      var el = document.getElementById('cityStripPage' + i);
+      if (el) el.style.display = (i === cur) ? 'flex' : 'none';
+    }
+    for (var i = 0; i < pages; i++) {
+      var dot = document.getElementById('cityStripDot' + i);
+      if (!dot) continue;
+      dot.style.width      = (i === cur) ? '16px' : '5px';
+      dot.style.background = (i === cur) ? 'rgba(192,72,90,.60)' : 'rgba(192,72,90,.2)';
+    }
+    var prev = document.getElementById('cityStripPrev');
+    var next = document.getElementById('cityStripNext');
+    if (prev) {
+      prev.disabled      = (cur === 0);
+      prev.style.opacity = (cur === 0) ? '0.35' : '1';
+      prev.style.cursor  = (cur === 0) ? 'not-allowed' : 'pointer';
+    }
+    if (next) {
+      next.disabled      = (cur === pages - 1);
+      next.style.opacity = (cur === pages - 1) ? '0.35' : '1';
+      next.style.cursor  = (cur === pages - 1) ? 'not-allowed' : 'pointer';
+    }
+    var info = document.getElementById('cityStripInfo');
+    if (info) {
+      var start = cur * perPage + 1;
+      var end   = Math.min((cur + 1) * perPage, total);
+      info.textContent = start + '–' + end + ' dari ' + total;
+    }
+  }
+
+  window.cityStripSlider  = function(dir) { cur = Math.max(0, Math.min(pages - 1, cur + dir)); update(); };
+  window.cityStripGoPage  = function(p)   { cur = p; update(); };
+
+  update();
 })();
 </script>
 
