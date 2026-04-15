@@ -510,12 +510,12 @@ require_once __DIR__ . '/../includes/header.php';
   text-decoration:none; transition:all .25s; display:block;
 }
 .mini-prod-card:hover { transform:translateY(-3px); box-shadow:0 6px 18px rgba(192,72,90,.10); border-color:#fca5a5; }
-.mini-prod-img { height:100px; overflow:hidden; background:linear-gradient(135deg,#fdf0f3,#fdf6ee); }
+.mini-prod-img { height:190px; overflow:hidden; background:linear-gradient(135deg,#fdf0f3,#fdf6ee); }
 .mini-prod-img img { width:100%;height:100%;object-fit:cover;transition:transform .35s; }
 .mini-prod-card:hover .mini-prod-img img { transform:scale(1.07); }
-.mini-prod-body { padding:.55rem .65rem; }
-.mini-prod-name { font-family:'Jost',sans-serif;font-size:.72rem;font-weight:600;color:#374151;line-height:1.35;margin-bottom:.2rem;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
-.mini-prod-price { font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:700;color:var(--rose); }
+.mini-prod-body { padding:1rem 1.1rem 1.2rem; }
+.mini-prod-name { font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:#2a1018;line-height:1.25;margin-bottom:.5rem;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+.mini-prod-price { font-family:'Jost',sans-serif;font-size:.95rem;font-weight:600;color:var(--rose); }
 
 /* Nearby cities */
 .nearby-city-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; }

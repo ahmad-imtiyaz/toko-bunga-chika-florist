@@ -642,7 +642,7 @@ require_once __DIR__ . '/../includes/header.php';
   border-color: #fca5a5;
 }
 .mini-prod-img {
-  height: 90px;
+  height: 190px;
   overflow: hidden;
   background: linear-gradient(135deg,#fdf0f3,#fdf6ee);
 }
@@ -652,14 +652,14 @@ require_once __DIR__ . '/../includes/header.php';
   transition: transform .35s;
 }
 .mini-prod-card:hover .mini-prod-img img { transform: scale(1.07); }
-.mini-prod-body { padding: 0.55rem 0.65rem; }
+.mini-prod-body { padding: 1rem 1.1rem 1.2rem; }
 .mini-prod-name {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.72rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
   font-weight: 600;
   color: #374151;
-  line-height: 1.35;
-  margin-bottom: 0.2rem;
+  line-height: 1.25;
+  margin-bottom: .5rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -667,9 +667,9 @@ require_once __DIR__ . '/../includes/header.php';
   overflow: hidden;
 }
 .mini-prod-price {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-family: 'Jost', sans-serif;
+  font-size: .95rem;
+  font-weight: 600;
   color: #e11d48;
 }
 
