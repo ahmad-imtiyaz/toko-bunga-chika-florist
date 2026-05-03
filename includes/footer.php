@@ -378,6 +378,56 @@ $mainCats    = getMainCategories();
   border-radius: 999px; border: 2px solid rgba(37,211,102,.4);
   animation: cfWaRing 2s ease-out infinite;
 }
+/* ─── MARKETPLACE LINKS (floral theme) ─── */
+.cf-footer-markets-label {
+  font-size: .62rem; font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(140,80,70,.45);
+  margin-top: 1.4rem; margin-bottom: .6rem;
+  display: flex; align-items: center; gap: .5rem;
+}
+.cf-footer-markets-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(192,72,90,.20), transparent);
+}
+.cf-footer-markets {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.cf-footer-market-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 11px;
+  background: rgba(255,255,255,.65);
+  border: 1px solid rgba(160,100,90,.18);
+  border-radius: 999px;
+  text-decoration: none;
+  color: rgba(80,45,40,.55);
+  font-size: .72rem; font-weight: 600;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(160,100,90,.07);
+  transition: background .22s, border-color .22s, color .22s,
+              transform .22s, box-shadow .22s;
+}
+.cf-footer-market-btn:hover {
+  background: rgba(192,72,90,.08);
+  border-color: rgba(192,72,90,.35);
+  color: rgba(192,72,90,.90);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(192,72,90,.15);
+}
+.cf-footer-market-btn img {
+  width: 14px; height: 14px;
+  object-fit: contain; flex-shrink: 0;
+  opacity: .75;
+  transition: opacity .22s, transform .22s;
+}
+.cf-footer-market-btn:hover img {
+  opacity: 1;
+  transform: scale(1.12);
+}
 @keyframes cfWaRing {
   0%   { transform: scale(1); opacity: .8; }
   100% { transform: scale(1.18); opacity: 0; }
@@ -514,11 +564,36 @@ $mainCats    = getMainCategories();
           </svg>
         </a>
       </div>
-      <div class="cf-footer-badge">
+   <div class="cf-footer-badge">
         <span class="cf-footer-badge-dot"></span>
         Buka 24 Jam Nonstop
       </div>
+
+      <!-- ── Marketplace ── -->
+      <p class="cf-footer-markets-label">Temukan Kami di</p>
+      <div class="cf-footer-markets">
+        <a href="https://id.shp.ee/R1iEKrTg"
+           target="_blank" rel="noopener"
+           class="cf-footer-market-btn" aria-label="Shopee">
+          <img src="<?= BASE_URL ?>/assets/svg/shopee.svg" alt="Shopee" width="14" height="14">
+          Shopee
+        </a>
+        <a href="https://vt.tiktok.com/ZS9992dcj/?page=Mall"
+           target="_blank" rel="noopener"
+           class="cf-footer-market-btn" aria-label="TikTok Shop">
+          <img src="<?= BASE_URL ?>/assets/svg/tiktok.svg" alt="TikTok Shop" width="14" height="14">
+          TikTok Shop
+        </a>
+        <a href="https://tk.tokopedia.com/ZS999mNA8/"
+           target="_blank" rel="noopener"
+           class="cf-footer-market-btn" aria-label="Tokopedia">
+          <img src="<?= BASE_URL ?>/assets/svg/tokopedia.svg" alt="Tokopedia" width="14" height="14">
+          Tokopedia
+        </a>
+      </div>
+
     </div>
+
 
     <!-- Kolom 2: Produk -->
     <div>
