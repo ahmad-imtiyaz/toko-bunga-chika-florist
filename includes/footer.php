@@ -578,7 +578,7 @@ $mainCats    = getMainCategories();
           <img src="<?= BASE_URL ?>/assets/svg/shopee.svg" alt="Shopee" width="14" height="14">
           Shopee
         </a>
-        <a href="https://vt.tiktok.com/ZS9992dcj/?page=Mall"
+        <a href="https://www.tiktok.com/@companyflorist?_r=1&_t=ZS-963MFQW40e2"
            target="_blank" rel="noopener"
            class="cf-footer-market-btn" aria-label="TikTok Shop">
           <img src="<?= BASE_URL ?>/assets/svg/tiktok.svg" alt="TikTok Shop" width="14" height="14">
