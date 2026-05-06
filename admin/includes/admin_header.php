@@ -63,7 +63,9 @@ body{font-family:'Lato',sans-serif}
 <aside class="w-56 bg-white border-r border-rose-100 flex flex-col fixed h-full z-30 shadow-sm">
   <div class="p-4 border-b border-rose-100">
     <a href="<?= BASE_URL ?>/admin/dashboard" class="flex items-center gap-2">
-      <div class="w-8 h-8 bg-rose-600 rounded-lg flex items-center justify-center"><span class="text-white text-sm">🌸</span></div>
+      <div class="w-8 h-8 rounded-lg overflow-hidden border border-rose-100 bg-white">
+  <img src="<?= UPLOAD_URL . $logo ?>" alt="Logo" class="w-full h-full object-contain">
+</div>
       <div>
         <p class="font-display font-bold text-gray-900 text-sm leading-tight">Chika Florist</p>
         <p class="text-xs text-gray-400">Admin Panel</p>

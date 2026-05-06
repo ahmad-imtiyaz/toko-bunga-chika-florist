@@ -36,9 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="min-h-screen bg-gradient-to-br from-rose-50 via-white to-amber-50 flex items-center justify-center px-4">
 <div class="w-full max-w-sm">
   <div class="text-center mb-8">
-    <div class="w-16 h-16 bg-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-      <span class="text-white text-2xl">🌸</span>
-    </div>
+    <div class="w-16 h-16 rounded-2xl overflow-hidden shadow-lg mx-auto mb-4 border border-rose-100 bg-white">
+  <img src="<?= UPLOAD_URL . $logo ?>" alt="Logo" class="w-full h-full object-contain p-1">
+</div>
     <h1 class="font-display text-2xl font-bold text-gray-900">Chika Florist</h1>
     <p class="text-gray-500 text-sm mt-1">Panel Admin</p>
   </div>
